@@ -1,0 +1,283 @@
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>epwvis</title>
+<!-- load css -->
+<link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css" type="text/css"/>
+
+<!-- load javascript libraries -->
+<script type="text/javascript" src="./lib/js/jQuery/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="./lib/js/bootstrap/bootstrap.min.js"></script>
+<script type="text/javascript" src="./lib/js/d3/d3.min.js"></script>
+<script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
+<script type="text/javascript" src="./lib/js/epw2json.js"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js"></script>
+
+<style>
+	html {
+        position: relative;
+        min-height: 100%;
+    }
+	body {
+		background-color: white;
+		font-family: sans-serif;
+    	font-weight: normal;
+        margin-bottom: 60px;
+	}
+	.heading{
+    	font-size: 14px;
+    	font-weight: normal;
+        font-style: italic;
+	}
+    .upload-drop-zone {
+      height: 60;
+      width: 200;
+      border-width: 2px;
+      margin-bottom: 5px;
+      color: #ccc;
+      border-style: dashed;
+      border-color: #ccc;
+      line-height: 60px;
+      text-align: center;
+    }
+    .upload-drop-zone.drop {
+      color: #4169E1;
+      border-color: #4169E1;
+    }
+	a:link {
+      color: steelblue;
+	}
+	a:visited {
+	  color: grey;
+	}
+	a:hover {
+	  color: black;
+	}
+    #epwChartDiv {
+      display: none;
+    }
+    .footer {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      /* Set the fixed height of the footer here */
+      height: 40px;
+      background-color: #f5f5f5;
+    }
+</style>
+
+</head>
+
+<body>
+<div id="wrapper">
+
+    <!-- header -->
+    <header>
+      <nav class="navbar navbar-default navbar-static-top">
+          <div class="container-fluid">
+            <div class="navbar-header">
+              <span>
+              <h3>epwvis
+                <span class="heading"> - An online viewer and analysis tool for EnergyPlus Weather (EPW) files</span>
+              </h3>
+              </span>            
+          </div>
+        </div>
+      </nav>
+    </header> <!-- header -->
+
+    <!-- side bar navigation -->
+<!--     <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav in" id="side-menu">
+                <li>
+                    <a href="#TemperatureFloodplot">Temperature Floodplot</a>
+                </li>
+                <li>
+                    <a href="#Filter">Filter</a>
+                </li>
+                <li>
+                    <a href="#Windrose">Windrose</a>
+                </li>
+            </ul>
+        </div>
+    </div> -->
+
+    <!-- page wrapper -->
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                
+                    <!-- second nav bar -->
+                    <div class="collapse navbar-collapse">
+                        <ul class="nav navbar-nav">
+                          <li>
+                            <label>Select EPW File:</label>
+                            <input type="file" id="fileinput" style="width:200px;"></input>
+                          </li>
+                          <li style="text-align:center; padding-right:15px;"><h3>OR</h3></li>
+                          <li>
+                            <!-- from: http://bootsnipp.com/snippets/featured/bootstrap-drag-and-drop-upload -->
+                            <div class="upload-drop-zone" id="drop-zone">
+                                drag and drop EPW file here
+                            </div>
+                          </li>
+                        </ul>
+                        
+                        <ul class="nav navbar-nav navbar-right">
+                          <li>
+                          Unit System:
+                          <div class="btn-group" data-toggle="buttons">
+                            <button type="button" class="btn btn-default navbar-btn active" id="buttonIP">IP</button>
+                            <button type="button" class="btn btn-default navbar-btn" id="buttonSI">SI</button>
+<!--                             <label type="button" class="btn btn-default navbar-btn active">
+                              <input type="radio" id="buttonIP">IP</input>
+                            </label>
+                            <label type="button" class="btn btn-default navbar-btn">
+                              <input type="radio" id="buttonSI">SI</input>
+                            </label> -->
+                          </div>
+                          </li>
+                        </ul>
+                    </div>  <!-- second nav bar -->
+                  
+                    <h3 id="stationName"></h3>
+                   
+                    <div id="epwChartDiv">
+                        <div id="TemperatureFloodplot">
+                            <h3>Drybulb Temperature Floodplot</h3>
+                            <div id="epwTempFloodPlot"></div>
+                        </div>
+
+                        <div id="epwTempFilter">
+                            <h3>Drybulb Temperature Filter</h3>                        
+                            <p id="tempFilterExamples"></p>
+                            
+                            <aside id="xfilterTotals"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</aside>
+
+                            <div id="xfilterCharts">
+                              <div id="month-chart" class="xfilterChart">
+                                <div class="title">Month</div>
+                              </div>
+                              <div id="hour-chart" class="xfilterChart">
+                                <div class="title">Hour</div>
+                              </div>
+                              <div id="value-chart" class="xfilterChart">
+                                <div class="title">Value</div>
+                              </div>
+                            </div>                        
+                        </div>
+                        
+                        <div id="CloudFloodplot">
+                            <h3>Cloud Cover Floodplot</h3>
+                            <div id="epwCloudFloodPlot"></div>
+                        </div>
+                        
+                        <div id="WindRose">
+                            <h3>Wind Rose</h3>
+                            <div id="epwWindRose"></div>
+                        </div>
+                    </div>
+                </div>                    
+            </div>
+        </div>
+    </div> <!-- page wrapper -->
+
+    <!-- footer -->
+    <footer class="footer">
+      <div class="container-fluid">
+        <p>Source code is available under an MIT license on <a href="https://github.com/mdahlhausen/epwvis" rel="link">Github</a>.  Please provide <a href="https://github.com/mdahlhausen/epwvis/issues" rel="link">feedback, report issues, and request graphs you would like to see here</a>.</p>
+      </div>
+    </footer> <!-- footer -->
+</div> <!-- end page elements-->
+
+<script type="text/javascript">
+  //from: http://www.html5rocks.com/en/tutorials/file/dndfiles/
+  
+  //global variables
+  var epw = {};
+  var unitSystem = "IP";
+  
+  $("#buttonIP").on("click", function(e) {
+    $(this).toggleClass("active");
+    $("#buttonSI").toggleClass("active");
+    unitSystem = "IP";
+    updateCharts(epw,unitSystem);
+  });
+
+  $("#buttonSI").on("click", function(e) {
+    $(this).toggleClass("active");
+    $("#buttonIP").toggleClass("active");
+    unitSystem = "SI";
+    updateCharts(epw,unitSystem);
+  });
+  
+  function updateCharts(epw,unitSystem) {
+    console.log("drawing charts in " + unitSystem + " units");
+    clearEPWCharts();
+    $("#epwChartDiv").show(); //unhide
+
+    //update graphs
+	epwTempFloodPlot(epw);
+    epwTempFilter(epw);
+    epwCloudFloodPlot(epw);
+    epwWindRose(epw);
+  };  
+  
+  function readSingleFile(file) {
+    var f = file;
+    if (f) {
+      var r = new FileReader();
+	  r.onloadstart = function(e) {
+        clearEPWCharts();
+	    document.getElementById('fileinput').innerHTML = "parsing file...";
+	  };
+      r.onload = function(e) {
+        // read in file
+        var contents = e.target.result;
+        var raw = r.result;
+        
+        // parse file to an epw json object
+        epw = epw2json(raw);
+        
+		//console.log(epw);
+		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
+        updateCharts(epw, unitSystem)
+     };
+      r.readAsText(f);
+    } else { 
+      alert("Failed to load file");
+    }
+  };
+
+  fileInput = document.getElementById('fileinput');
+  
+  fileInput.onchange = function(evt) {
+    readSingleFile(evt.target.files[0]);
+  };  
+  
+  dropZone = document.getElementById('drop-zone');
+
+  dropZone.ondrop = function(e) {
+    e.preventDefault();
+    this.className = 'upload-drop-zone';
+    readSingleFile(e.dataTransfer.files[0]);
+  };
+  
+  dropZone.ondragover = function() {
+      this.className = 'upload-drop-zone drop';
+      return false;
+  };
+
+  dropZone.ondragleave = function() {
+      this.className = 'upload-drop-zone';
+      return false;
+  }; 
+</script>
+
+</body>
+</html>
