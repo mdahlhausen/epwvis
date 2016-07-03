@@ -1,0 +1,70 @@
+#xfilterCharts {
+  padding: 10px 0;
+}
+
+.xfilterChart {
+  display: inline-block;
+  height: 151px;
+  margin-bottom: 20px;
+}
+
+.reset {
+  padding-left: 1em;
+  font-size: smaller;
+  color: #ccc;
+}
+
+.background.bar {
+  fill: #ccc;
+}
+
+.foreground.bar {
+  fill: steelblue;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.brush rect.extent {
+  fill: steelblue;
+  fill-opacity: .125;
+}
+
+.brush .resize path {
+  fill: #eee;
+  stroke: #666;
+}
+
+#month-chart {
+  width: 300px;
+}
+
+#hour-chart {
+  width: 420px;
+}
+
+#value-chart {
+  width: 720px;
+}
+
+aside {
+  position: absolute;
+  left: 740px;
+  font-size: smaller;
+  width: 220px;
+}
+
+.legend text {
+  font: 12px sans-serif;
+}
+
+.legend-header text {
+  font: 14px sans-serif;
+}
