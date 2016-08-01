@@ -4,7 +4,7 @@
 
 .xfilterChart {
   display: inline-block;
-  height: 151px;
+  height: 150px;
   margin-bottom: 20px;
 }
 
@@ -42,16 +42,16 @@
   stroke: #666;
 }
 
-#month-chart {
-  width: 300px;
+#month-chart {  
+  width: 280px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 #hour-chart {
-  width: 420px;
+  width: 520px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 #value-chart {
-  width: 720px;
+  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 aside {
