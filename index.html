@@ -199,34 +199,9 @@
   //from: http://www.html5rocks.com/en/tutorials/file/dndfiles/
   
   //global variables
+   var epwURL = "";
   var epw = {};
   var unitSystem = "IP";
-  
-  $("#buttonIP").on("click", function(e) {
-    $(this).toggleClass("active");
-    $("#buttonSI").toggleClass("active");
-    unitSystem = "IP";
-    updateCharts(epw,unitSystem);
-  });
-
-  $("#buttonSI").on("click", function(e) {
-    $(this).toggleClass("active");
-    $("#buttonIP").toggleClass("active");
-    unitSystem = "SI";
-    updateCharts(epw,unitSystem);
-  });
-  
-  function updateCharts(epw,unitSystem) {
-    console.log("drawing charts in " + unitSystem + " units");
-    clearEPWCharts();
-    $("#epwChartDiv").show(); //unhide
-
-    //update graphs
-	epwTempFloodPlot(epw);
-    epwTempFilter(epw);
-    epwCloudFloodPlot(epw);
-    epwWindRose(epw);
-  };  
   
   function readSingleFile(file) {
     var f = file;
@@ -247,13 +222,51 @@
 		//console.log(epw);
 		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
         updateCharts(epw, unitSystem)
-     };
-      r.readAsText(f);
+      };	  
+	  r.readAsText(f);      
     } else { 
       alert("Failed to load file");
     }
   };
-
+  
+  //var file_path = encodeURIComponent("https://energyplus.net/weather-download/asia_wmo_region_2/RUS//RUS_Ekaterinburg.284400_IWEC/RUS_Ekaterinburg.284400_IWEC.epw");
+  //console.log("file_path:" + file_path)
+  //epw=C%3AUsersMatthew_2DesktopUSA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw  //?file=https%3A%2F%2Fenergyplus.net%2Fweather-download%2Fasia_wmo_region_2%2FRUS%2F%2FRUS_Ekaterinburg.284400_IWEC%2FRUS_Ekaterinburg.284400_IWEC.epw
+  
+  function parseURI(){
+  
+    var parseParams = {
+	  file : ""
+    }
+  
+    var parse = window.location.search.replace("?","").split("&")
+		
+	if (parse[0]=="") {
+		//no file
+		return;
+	}
+	
+	parse.forEach(function(d){
+		keyValue = d.split("=");
+		parseParams[keyValue[0].toLowerCase()] = decodeURIComponent(keyValue[1]);
+	})
+	
+	var epwURL = parseParams.file;
+	console.log("attempting to download file from:" + parseParams.file);
+	
+	var userOK = confirm("DO YOU WANT TO DOWNLOAD THE .EPW FILE FROM THIS URL?: " + epwURL + "  YOU MAY NEED TO DISABLE YOUR POP-UP BLOCKER FOR THIS SITE")
+	if (userOK == true){
+	  window.open(epwURL,'_blank');
+	};
+	
+	//need to do a cross-domain request to download the file and read it upon successful load
+	//http://stackoverflow.com/questions/15005500/loading-cross-domain-html-page-with-ajax
+	//http://www.ajax-cross-origin.com/
+	//for now, simply open the url in a new window and the user can drag and drop
+	//readSingleFile(epwFilePath);
+  };    
+  parseURI();
+  
   fileInput = document.getElementById('fileinput');
   
   fileInput.onchange = function(evt) {
@@ -276,7 +289,33 @@
   dropZone.ondragleave = function() {
       this.className = 'upload-drop-zone';
       return false;
-  }; 
+  };
+  
+  function updateCharts(epw,unitSystem) {
+    console.log("drawing charts in " + unitSystem + " units");
+    clearEPWCharts();
+    $("#epwChartDiv").show(); //unhide
+
+    //update graphs
+	epwTempFloodPlot(epw);
+    epwTempFilter(epw);
+    epwCloudFloodPlot(epw);
+    epwWindRose(epw);
+  };  
+  
+  $("#buttonIP").on("click", function(e) {
+    $(this).toggleClass("active");
+    $("#buttonSI").toggleClass("active");
+    unitSystem = "IP";
+    updateCharts(epw,unitSystem);
+  });
+
+  $("#buttonSI").on("click", function(e) {
+    $(this).toggleClass("active");
+    $("#buttonIP").toggleClass("active");
+    unitSystem = "SI";
+    updateCharts(epw,unitSystem);
+  });  
 </script>
 
 <script>
