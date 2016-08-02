@@ -50,7 +50,15 @@
   width: 520px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
-#value-chart {
+#drybulb-temperature-chart {
+  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+}
+
+#dewpoint-temperature-chart {
+  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+}
+
+#rh-chart {
   width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 

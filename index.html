@@ -153,8 +153,8 @@
                             <div id="epwTempFloodPlot"></div>
                         </div>
 
-                        <div id="epwTempFilter">
-                            <h3>Drybulb Temperature Filter</h3>                        
+                        <div id="epwValueFilter">
+                            <h3>Value Filter</h3>                        
                             <p id="tempFilterExamples"></p>
                             
                             <aside id="xfilterTotals"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</aside>
@@ -166,8 +166,14 @@
                               <div id="hour-chart" class="xfilterChart">
                                 <div class="title">Hour</div>
                               </div>
-                              <div id="value-chart" class="xfilterChart">
-                                <div class="title">Value</div>
+                              <div id="drybulb-temperature-chart" class="xfilterChart">
+                                <div class="title">Drybulb Temperature</div>
+                              </div>
+                              <div id="dewpoint-temperature-chart" class="xfilterChart">
+                                <div class="title">Dewpoint Temperature</div>
+                              </div>
+                              <div id="rh-chart" class="xfilterChart">
+                                <div class="title">Relative Humidity</div>
                               </div>
                             </div>                        
                         </div>
@@ -298,7 +304,7 @@
 
     //update graphs
 	epwTempFloodPlot(epw);
-    epwTempFilter(epw);
+    epwValueFilter(epw);
     epwCloudFloodPlot(epw);
     epwWindRose(epw);
   };  
