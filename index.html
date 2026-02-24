@@ -13,6 +13,7 @@
 <script type="text/javascript" src="./lib/js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="./lib/js/d3/d3.min.js"></script>
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
+<script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js"></script>
 <script type="text/javascript" src="./lib/js/epwCharts.js"></script>
 
@@ -81,9 +82,11 @@
             <div class="navbar-header">
               <span>
               <h3>epwvis
-                <span class="heading"> - An online viewer and analysis tool for EnergyPlus Weather (EPW) files</span>
+                <span class="heading"> - An online viewer and analysis tool for EnergyPlus Weather (EPW) files.
+                  Weather files can be found at <a href="https://www.ladybug.tools/epwmap/" target="_blank">EPW map</a> or <a href="https://climate.onebuilding.org" target="_blank">OneBuilding</a>.
+                </span>
               </h3>
-              </span>            
+              </span>
           </div>
         </div>
       </nav>
@@ -111,7 +114,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
-                
+
                     <!-- second nav bar -->
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav">
@@ -127,7 +130,7 @@
                             </div>
                           </li>
                         </ul>
-                        
+
                         <ul class="nav navbar-nav navbar-right">
                           <li>
                           Unit System:
@@ -144,19 +147,19 @@
                           </li>
                         </ul>
                     </div>  <!-- second nav bar -->
-                  
+
                     <h3 id="stationName"></h3>
-                   
+
                     <div id="epwChartDiv">
                         <div id="TemperatureFloodplot">
                             <h3>Drybulb Temperature Floodplot</h3>
                             <div id="epwTempFloodPlot"></div>
                         </div>
 
-                        <div id="epwTempFilter">
-                            <h3>Drybulb Temperature Filter</h3>                        
+                        <div id="epwValueFilter">
+                            <h3>Value Filter <button onclick="resetAll()" class="btn btn-default btn-xs" style="vertical-align:middle;">Reset Filters</button></h3>
                             <p id="tempFilterExamples"></p>
-                            
+
                             <aside id="xfilterTotals"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</aside>
 
                             <div id="xfilterCharts">
@@ -166,23 +169,34 @@
                               <div id="hour-chart" class="xfilterChart">
                                 <div class="title">Hour</div>
                               </div>
-                              <div id="value-chart" class="xfilterChart">
-                                <div class="title">Value</div>
+                              <div id="drybulb-temperature-chart" class="xfilterChart">
+                                <div class="title">Drybulb Temperature</div>
                               </div>
-                            </div>                        
+                              <div id="dewpoint-temperature-chart" class="xfilterChart">
+                                <div class="title">Dewpoint Temperature</div>
+                              </div>
+                              <div id="rh-chart" class="xfilterChart">
+                                <div class="title">Relative Humidity</div>
+                              </div>
+                            </div>
                         </div>
-                        
+
                         <div id="CloudFloodplot">
                             <h3>Cloud Cover Floodplot</h3>
                             <div id="epwCloudFloodPlot"></div>
                         </div>
-                        
+
                         <div id="WindRose">
                             <h3>Wind Rose</h3>
                             <div id="epwWindRose"></div>
                         </div>
+
+                        <div id="PsychroChart">
+                            <h3>Psychrometric Chart</h3>
+                            <div id="epwPsychroChart"></div>
+                        </div>
                     </div>
-                </div>                    
+                </div>
             </div>
         </div>
     </div> <!-- page wrapper -->
@@ -190,18 +204,120 @@
     <!-- footer -->
     <footer class="footer">
       <div class="container-fluid">
-        <p>Source code is available under an MIT license on <a href="https://github.com/mdahlhausen/epwvis" rel="link">Github</a>.  Please provide <a href="https://github.com/mdahlhausen/epwvis/issues" rel="link">feedback, report issues, and request graphs you would like to see here</a>.</p>
+        <p>Source code is available under an MIT license on <a href="https://github.com/mdahlhausen/epwvis" rel="link">Github</a>.  Please provide <a href="https://github.com/mdahlhausen/epwvis/issues" rel="link">feedback, report issues, and request graphs you would like to see here</a>.  To compare weather files, <a href="http://jess.ensims.com/epw_compare.html" rel="link">see this adaptation</a>.</p>
       </div>
     </footer> <!-- footer -->
 </div> <!-- end page elements-->
 
 <script type="text/javascript">
   //from: http://www.html5rocks.com/en/tutorials/file/dndfiles/
-  
+
   //global variables
+   var epwURL = "";
   var epw = {};
   var unitSystem = "IP";
-  
+
+  function readSingleFile(file) {
+    var f = file;
+    if (f) {
+      var r = new FileReader();
+	  r.onloadstart = function(e) {
+        clearEPWCharts();
+	    document.getElementById('fileinput').innerHTML = "parsing file...";
+	  };
+      r.onload = function(e) {
+        // read in file
+        var contents = e.target.result;
+        var raw = r.result;
+
+        // parse file to an epw json object
+        epw = epw2json(raw);
+
+		//console.log(epw);
+		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
+        updateCharts(epw, unitSystem)
+      };
+	  r.readAsText(f);
+    } else {
+      alert("Failed to load file");
+    }
+  };
+
+  //var file_path = encodeURIComponent("https://energyplus.net/weather-download/asia_wmo_region_2/RUS//RUS_Ekaterinburg.284400_IWEC/RUS_Ekaterinburg.284400_IWEC.epw");
+  //console.log("file_path:" + file_path)
+  //epw=C%3AUsersMatthew_2DesktopUSA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw  //?file=https%3A%2F%2Fenergyplus.net%2Fweather-download%2Fasia_wmo_region_2%2FRUS%2F%2FRUS_Ekaterinburg.284400_IWEC%2FRUS_Ekaterinburg.284400_IWEC.epw
+
+  function parseURI(){
+
+    var parseParams = {
+	  file : ""
+    }
+
+    var parse = window.location.search.replace("?","").split("&")
+
+	if (parse[0]=="") {
+		//no file
+		return;
+	}
+
+	parse.forEach(function(d){
+		keyValue = d.split("=");
+		parseParams[keyValue[0].toLowerCase()] = decodeURIComponent(keyValue[1]);
+	})
+
+	var epwURL = parseParams.file;
+	console.log("attempting to download file from:" + parseParams.file);
+
+	var userOK = confirm("DO YOU WANT TO DOWNLOAD THE .EPW FILE FROM THIS URL?: " + epwURL + "  YOU MAY NEED TO DISABLE YOUR POP-UP BLOCKER FOR THIS SITE")
+	if (userOK == true){
+	  window.open(epwURL,'_blank');
+	};
+
+	//need to do a cross-domain request to download the file and read it upon successful load
+	//http://stackoverflow.com/questions/15005500/loading-cross-domain-html-page-with-ajax
+	//http://www.ajax-cross-origin.com/
+	//for now, simply open the url in a new window and the user can drag and drop
+	//readSingleFile(epwFilePath);
+  };
+  parseURI();
+
+  fileInput = document.getElementById('fileinput');
+
+  fileInput.onchange = function(evt) {
+    readSingleFile(evt.target.files[0]);
+  };
+
+  dropZone = document.getElementById('drop-zone');
+
+  dropZone.ondrop = function(e) {
+    e.preventDefault();
+    this.className = 'upload-drop-zone';
+    readSingleFile(e.dataTransfer.files[0]);
+  };
+
+  dropZone.ondragover = function() {
+      this.className = 'upload-drop-zone drop';
+      return false;
+  };
+
+  dropZone.ondragleave = function() {
+      this.className = 'upload-drop-zone';
+      return false;
+  };
+
+  function updateCharts(epw,unitSystem) {
+    console.log("drawing charts in " + unitSystem + " units");
+    clearEPWCharts();
+    $("#epwChartDiv").show(); //unhide
+
+    //update graphs
+	epwTempFloodPlot(epw);
+    epwPsychroChart(epw);
+    epwValueFilter(epw);
+    epwCloudFloodPlot(epw);
+    epwWindRose(epw);
+  };
+
   $("#buttonIP").on("click", function(e) {
     $(this).toggleClass("active");
     $("#buttonSI").toggleClass("active");
@@ -215,68 +331,6 @@
     unitSystem = "SI";
     updateCharts(epw,unitSystem);
   });
-  
-  function updateCharts(epw,unitSystem) {
-    console.log("drawing charts in " + unitSystem + " units");
-    clearEPWCharts();
-    $("#epwChartDiv").show(); //unhide
-
-    //update graphs
-	epwTempFloodPlot(epw);
-    epwTempFilter(epw);
-    epwCloudFloodPlot(epw);
-    epwWindRose(epw);
-  };  
-  
-  function readSingleFile(file) {
-    var f = file;
-    if (f) {
-      var r = new FileReader();
-	  r.onloadstart = function(e) {
-        clearEPWCharts();
-	    document.getElementById('fileinput').innerHTML = "parsing file...";
-	  };
-      r.onload = function(e) {
-        // read in file
-        var contents = e.target.result;
-        var raw = r.result;
-        
-        // parse file to an epw json object
-        epw = epw2json(raw);
-        
-		//console.log(epw);
-		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
-        updateCharts(epw, unitSystem)
-     };
-      r.readAsText(f);
-    } else { 
-      alert("Failed to load file");
-    }
-  };
-
-  fileInput = document.getElementById('fileinput');
-  
-  fileInput.onchange = function(evt) {
-    readSingleFile(evt.target.files[0]);
-  };  
-  
-  dropZone = document.getElementById('drop-zone');
-
-  dropZone.ondrop = function(e) {
-    e.preventDefault();
-    this.className = 'upload-drop-zone';
-    readSingleFile(e.dataTransfer.files[0]);
-  };
-  
-  dropZone.ondragover = function() {
-      this.className = 'upload-drop-zone drop';
-      return false;
-  };
-
-  dropZone.ondragleave = function() {
-      this.className = 'upload-drop-zone';
-      return false;
-  }; 
 </script>
 
 <script>
