@@ -4,6 +4,8 @@
 
 EPW files can be downloaded from [epwmap](http://mostapharoudsari.github.io/epwmap) or the [EnergyPlus weather](https://energyplus.net/weather) website.
 
+When an EPW file is parsed, epwvis now computes additional psychrometric properties (wet-bulb temperature, humidity ratio, specific humidity, vapor pressure, moist-air enthalpy/volume/density, and degree of saturation) using [PsychroLib](github.com/psychrometrics/psychrolib).
+
 ## How to Interpret the Visualizations
 See the [**Wiki**](https://github.com/mdahlhausen/epwvis/wiki) tab for more details on how to interpret weather data for environmental design and building energy modeling.
 
@@ -13,4 +15,4 @@ See the [**Wiki**](https://github.com/mdahlhausen/epwvis/wiki) tab for more deta
 
 ## Credits
   - Thanks to [Mostapha Roudsari](https://github.com/mostaphaRoudsari) and [Chris Mackey](https://github.com/chriswmackey) for [Ladybug](https://github.com/mostaphaRoudsari/ladybug) python code for parsing EPW files.  Other EPW parsers from [lmnarchitects](https://lmnarchitects.com/tech-studio/wp-content/uploads/sites/4/2014/04/Climate/epw-6hour.html) and René Buffat's [pyepw](https://github.com/rbuffat/pyepw) were helpful references.
-  - This tool uses [D3.js](https://d3js.org/) developed by Mike Bostock, and [crossfilter.js](http://square.github.io/crossfilter/).
+  - This tool uses [D3.js](https://d3js.org/) developed by Mike Bostock, [crossfilter.js](http://square.github.io/crossfilter/), and [PsychroLib](github.com/psychrometrics/psychrolib).
