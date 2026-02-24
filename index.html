@@ -82,7 +82,9 @@
             <div class="navbar-header">
               <span>
               <h3>epwvis
-                <span class="heading"> - An online viewer and analysis tool for EnergyPlus Weather (EPW) files</span>
+                <span class="heading"> - An online viewer and analysis tool for EnergyPlus Weather (EPW) files.
+                  Weather files can be found at <a href="https://www.ladybug.tools/epwmap/" target="_blank">EPW map</a> or <a href="https://climate.onebuilding.org" target="_blank">OneBuilding</a>.
+                </span>
               </h3>
               </span>
           </div>
@@ -187,6 +189,11 @@
                         <div id="WindRose">
                             <h3>Wind Rose</h3>
                             <div id="epwWindRose"></div>
+                        </div>
+
+                        <div id="PsychroChart">
+                            <h3>Psychrometric Chart</h3>
+                            <div id="epwPsychroChart"></div>
                         </div>
                     </div>
                 </div>
@@ -305,6 +312,7 @@
 
     //update graphs
 	epwTempFloodPlot(epw);
+    epwPsychroChart(epw);
     epwValueFilter(epw);
     epwCloudFloodPlot(epw);
     epwWindRose(epw);
