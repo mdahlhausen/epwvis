@@ -193,37 +193,55 @@
                         </div>
 
                         <div id="epwMain">
-                            <div id="TemperatureFloodplot">
-                                <h3>Drybulb Temperature Floodplot
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempFloodPlot','drybulb-temperature')">&#8659; SVG</button>
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTempFloodPlot','drybulb-temperature')">&#8659; PNG</button>
-                                </h3>
-                                <div id="epwTempFloodPlot"></div>
-                            </div>
+                            <!-- Tab navigation -->
+                            <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
+                                <li class="active"><a href="#tab-floodplots" data-toggle="tab">Floodplots</a></li>
+                                <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
+                                <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
+                            </ul>
 
-                            <div id="CloudFloodplot">
-                                <h3>Cloud Cover Floodplot
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwCloudFloodPlot','cloud-cover')">&#8659; SVG</button>
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwCloudFloodPlot','cloud-cover')">&#8659; PNG</button>
-                                </h3>
-                                <div id="epwCloudFloodPlot"></div>
-                            </div>
+                            <!-- Tab content -->
+                            <div class="tab-content">
 
-                            <div id="WindRose">
-                                <h3>Wind Rose
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
-                                </h3>
-                                <div id="epwWindRose"></div>
-                            </div>
+                                <div class="tab-pane active" id="tab-floodplots">
+                                    <div id="TemperatureFloodplot">
+                                        <h3>Drybulb Temperature Floodplot
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempFloodPlot','drybulb-temperature')">&#8659; SVG</button>
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTempFloodPlot','drybulb-temperature')">&#8659; PNG</button>
+                                        </h3>
+                                        <div id="epwTempFloodPlot"></div>
+                                    </div>
 
-                            <div id="PsychroChart">
-                                <h3>Psychrometric Chart
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
-                                  <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
-                                </h3>
-                                <div id="epwPsychroChart"></div>
-                            </div>
+                                    <div id="CloudFloodplot">
+                                        <h3>Cloud Cover Floodplot
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwCloudFloodPlot','cloud-cover')">&#8659; SVG</button>
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwCloudFloodPlot','cloud-cover')">&#8659; PNG</button>
+                                        </h3>
+                                        <div id="epwCloudFloodPlot"></div>
+                                    </div>
+                                </div><!-- /tab-floodplots -->
+
+                                <div class="tab-pane" id="tab-windrose">
+                                    <div id="WindRose">
+                                        <h3>Wind Rose
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
+                                        </h3>
+                                        <div id="epwWindRose"></div>
+                                    </div>
+                                </div><!-- /tab-windrose -->
+
+                                <div class="tab-pane" id="tab-psychro">
+                                    <div id="PsychroChart">
+                                        <h3>Psychrometric Chart
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
+                                        </h3>
+                                        <div id="epwPsychroChart"></div>
+                                    </div>
+                                </div><!-- /tab-psychro -->
+
+                            </div><!-- /tab-content -->
                         </div>
 
                     </div>
@@ -335,11 +353,12 @@
     clearEPWCharts();
     $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
 
-    //update graphs
-	epwTempFloodPlot(epw);
+    // draw all charts (tabs just hide/show; all SVGs are always rendered)
+    epwTempFloodPlot(epw);
+    epwCloudFloodPlot(epw);
+    epwWindRose(epw);
     epwPsychroChart(epw);
     epwValueFilter(epw);
-    epwCloudFloodPlot(epw);
   };
 
   $("#buttonIP").on("click", function(e) {
