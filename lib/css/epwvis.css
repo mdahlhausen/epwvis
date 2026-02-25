@@ -5,13 +5,33 @@
 .xfilterChart {
   display: inline-block;
   height: 100px;
-  margin-bottom: 10px;
+  margin-bottom: 30px;
 }
 
 .reset {
   padding-left: 1em;
   font-size: smaller;
   color: #ccc;
+}
+
+.chart-title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.chart-download-btns {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.chart-download-btns .btn,
+.chart-download-btns .btn-xs {
+  font-size: 9px;
+  padding: 1px 4px;
+  line-height: 1.4;
+  border-radius: 2px;
 }
 
 .background.bar {
@@ -49,7 +69,7 @@
 }
 
 #hour-chart {
-  width: 228px;
+  width: 210px;
   height: auto;
   vertical-align: top;
 }
