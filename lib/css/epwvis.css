@@ -4,8 +4,8 @@
 
 .xfilterChart {
   display: inline-block;
-  height: 150px;
-  margin-bottom: 20px;
+  height: 100px;
+  margin-bottom: 10px;
 }
 
 .reset {
@@ -65,30 +65,46 @@
 }
 
 #drybulb-temperature-chart {
-  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+  width: 470px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 #dewpoint-temperature-chart {
-  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+  width: 470px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 #rh-chart {
-  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+  width: 470px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 #wetbulb-temperature-chart {
-  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+  width: 470px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
 #enthalpy-chart {
-  width: 940px; /*make sure pixel width plus margins matches epwCharts.js*/
+  width: 470px; /*make sure pixel width plus margins matches epwCharts.js*/
 }
 
-aside {
-  position: absolute;
-  left: 740px;
-  font-size: smaller;
-  width: 220px;
+#epwChartDiv {
+  display: flex;
+  align-items: flex-start;
+}
+
+#epwSidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  width: 490px;
+  flex-shrink: 0;
+  border-right: 1px solid #ddd;
+  padding: 8px 16px 16px 0;
+}
+
+#epwMain {
+  flex: 1;
+  min-width: 0;
+  padding-left: 20px;
+  overflow-x: auto;
 }
 
 .legend text {
