@@ -6,16 +6,16 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.0" type="text/css"/>
 
 <!-- load javascript libraries -->
 <script type="text/javascript" src="./lib/js/jQuery/jquery-2.2.4.min.js"></script>
 <script type="text/javascript" src="./lib/js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="./lib/js/d3/d3.min.js"></script>
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
-<script type="text/javascript" src="./lib/js/psychrolib.js"></script>
-<script type="text/javascript" src="./lib/js/epw2json.js"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js"></script>
+<script type="text/javascript" src="./lib/js/psychrolib.js?v=1.0.0"></script>
+<script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.0"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.0"></script>
 
 <style>
 	html {
@@ -26,7 +26,6 @@
 		background-color: white;
 		font-family: sans-serif;
     	font-weight: normal;
-        margin-bottom: 60px;
 	}
 	.heading{
     	font-size: 14px;
@@ -60,14 +59,7 @@
     #epwChartDiv {
       display: none;
     }
-    .footer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      /* Set the fixed height of the footer here */
-      height: 40px;
-      background-color: #f5f5f5;
-    }
+
 </style>
 
 </head>
@@ -86,6 +78,7 @@
                   Weather files can be found at <a href="https://www.ladybug.tools/epwmap/" target="_blank">EPW map</a> or <a href="https://climate.onebuilding.org" target="_blank">OneBuilding</a>.
                 </span>
               </h3>
+              <p style="font-size:12px; color:#888; margin:0 0 4px 0;">Source code is available under an MIT license on <a href="https://github.com/mdahlhausen/epwvis" rel="link">Github</a>.  Please provide <a href="https://github.com/mdahlhausen/epwvis/issues" rel="link">feedback, report issues, and request graphs you would like to see here</a>.  To compare weather files, <a href="http://jess.ensims.com/epw_compare.html" rel="link">see this adaptation</a>.</p>
               </span>
           </div>
         </div>
@@ -151,16 +144,13 @@
                     <h3 id="stationName"></h3>
 
                     <div id="epwChartDiv">
-                        <div id="TemperatureFloodplot">
-                            <h3>Drybulb Temperature Floodplot</h3>
-                            <div id="epwTempFloodPlot"></div>
-                        </div>
 
-                        <div id="epwValueFilter">
-                            <h3>Value Filter <button onclick="resetAll()" class="btn btn-default btn-xs" style="vertical-align:middle;">Reset Filters</button></h3>
+                        <div id="epwSidebar">
+                            <h3 style="margin-top:8px; margin-bottom:4px;">Value Filter
+                                <button onclick="resetAll()" class="btn btn-default btn-xs" style="vertical-align:middle;">Reset Filters</button>
+                            </h3>
+                            <p style="font-size:smaller; margin-bottom:4px;"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</p>
                             <p id="tempFilterExamples"></p>
-
-                            <aside id="xfilterTotals"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</aside>
 
                             <div id="xfilterCharts">
                               <div id="month-chart" class="xfilterChart">
@@ -187,32 +177,34 @@
                             </div>
                         </div>
 
-                        <div id="CloudFloodplot">
-                            <h3>Cloud Cover Floodplot</h3>
-                            <div id="epwCloudFloodPlot"></div>
+                        <div id="epwMain">
+                            <div id="TemperatureFloodplot">
+                                <h3>Drybulb Temperature Floodplot</h3>
+                                <div id="epwTempFloodPlot"></div>
+                            </div>
+
+                            <div id="CloudFloodplot">
+                                <h3>Cloud Cover Floodplot</h3>
+                                <div id="epwCloudFloodPlot"></div>
+                            </div>
+
+                            <div id="WindRose">
+                                <h3>Wind Rose</h3>
+                                <div id="epwWindRose"></div>
+                            </div>
+
+                            <div id="PsychroChart">
+                                <h3>Psychrometric Chart</h3>
+                                <div id="epwPsychroChart"></div>
+                            </div>
                         </div>
 
-                        <div id="WindRose">
-                            <h3>Wind Rose</h3>
-                            <div id="epwWindRose"></div>
-                        </div>
-
-                        <div id="PsychroChart">
-                            <h3>Psychrometric Chart</h3>
-                            <div id="epwPsychroChart"></div>
-                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div> <!-- page wrapper -->
 
-    <!-- footer -->
-    <footer class="footer">
-      <div class="container-fluid">
-        <p>Source code is available under an MIT license on <a href="https://github.com/mdahlhausen/epwvis" rel="link">Github</a>.  Please provide <a href="https://github.com/mdahlhausen/epwvis/issues" rel="link">feedback, report issues, and request graphs you would like to see here</a>.  To compare weather files, <a href="http://jess.ensims.com/epw_compare.html" rel="link">see this adaptation</a>.</p>
-      </div>
-    </footer> <!-- footer -->
 </div> <!-- end page elements-->
 
 <script type="text/javascript">
@@ -314,14 +306,13 @@
   function updateCharts(epw,unitSystem) {
     console.log("drawing charts in " + unitSystem + " units");
     clearEPWCharts();
-    $("#epwChartDiv").show(); //unhide
+    $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
 
     //update graphs
 	epwTempFloodPlot(epw);
     epwPsychroChart(epw);
     epwValueFilter(epw);
     epwCloudFloodPlot(epw);
-    epwWindRose(epw);
   };
 
   $("#buttonIP").on("click", function(e) {
