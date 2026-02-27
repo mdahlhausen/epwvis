@@ -17,6 +17,8 @@
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.1"></script>
 <script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.2"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
+<script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
+<script type="text/javascript" src="./data/stations.js"></script>
 
 <style>
 	html {
@@ -71,6 +73,74 @@
 	}
     #epwChartDiv {
       display: none;
+    }
+
+    /* ---- Location search bar ---- */
+    #epw-search-container {
+      position: relative;
+      display: inline-block;
+    }
+    #epw-search-input {
+      width: 280px;
+    }
+    #epw-search-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 9999;
+      width: 380px;
+      max-height: 260px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .epw-search-item {
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .epw-search-item:hover, .epw-search-item.active {
+      background: #e8f0fe;
+    }
+    #epw-search-status {
+      font-size: 12px;
+      color: #888;
+      margin-top: 3px;
+      min-height: 16px;
+    }
+    #epw-search-status.error { color: #c0392b; }
+    #epw-search-status.loading { color: #2980b9; }
+    #epw-search-status.ok { color: #27ae60; }
+    #epw-progress-bar {
+      display: none;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+      width: 280px;
+    }
+    #epw-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #2980b9;
+      border-radius: 2px;
+      transition: width 0.12s ease;
+    }
+    @keyframes epw-indeterminate {
+      0%   { width: 0%;  margin-left: 0%; }
+      50%  { width: 45%; margin-left: 25%; }
+      100% { width: 0%;  margin-left: 100%; }
+    }
+    #epw-progress-bar.indeterminate #epw-progress-fill {
+      animation: epw-indeterminate 1.2s infinite ease-in-out;
     }
 
 </style>
@@ -133,6 +203,19 @@
                             <!-- from: http://bootsnipp.com/snippets/featured/bootstrap-drag-and-drop-upload -->
                             <div class="upload-drop-zone" id="drop-zone">
                                 drag and drop EPW file here
+                            </div>
+                          </li>
+                          <li style="text-align:center; padding-right:15px; padding-left:15px;"><h3>OR</h3></li>
+                          <li style="padding-top:6px;">
+                            <div id="epw-search-container">
+                              <div style="font-size:11px; color:#888; margin-bottom:3px;">TMYx 2009–2023 weather files from <a href="https://climate.onebuilding.org" target="_blank">OneBuilding</a></div>
+                              <input type="text" id="epw-search-input"
+                                class="form-control input-sm"
+                                placeholder="Search location (e.g. Denver CO, Paris, Tokyo)..."
+                                autocomplete="off">
+                              <div id="epw-search-dropdown"></div>
+                              <div id="epw-search-status">Loading station list…</div>
+                              <div id="epw-progress-bar"><div id="epw-progress-fill"></div></div>
                             </div>
                           </li>
                         </ul>
@@ -260,6 +343,253 @@
   var epw = {};
   var unitSystem = "IP";
 
+  // ---- Location search: station data and helpers ----
+  var epwStations = [];        // loaded from stations.json
+  var searchDebounceTimer = null;
+
+  // Station index is pre-loaded as a global via <script src="data/stations.js">
+  // (works with file:// URLs and HTTP alike — no fetch() required)
+  (function() {
+    var statusEl = document.getElementById('epw-search-status');
+    if (typeof ONE_BUILDING_EPW_STATIONS !== 'undefined' && ONE_BUILDING_EPW_STATIONS.length) {
+      epwStations = ONE_BUILDING_EPW_STATIONS;
+      statusEl.textContent = epwStations.length.toLocaleString() + ' stations available';
+      statusEl.className = '';
+    } else {
+      statusEl.textContent = 'Station list not loaded — ensure data/stations.js is present.';
+      statusEl.className = 'error';
+    }
+  })();
+
+  function searchStations(query) {
+    if (!query || query.trim().length < 2) return [];
+    var words = query.trim().toLowerCase().split(/\s+/);
+    var results = [];
+    for (var i = 0; i < epwStations.length; i++) {
+      var name = epwStations[i].n.toLowerCase();
+      var match = words.every(function(w) { return name.indexOf(w) !== -1; });
+      if (match) results.push(epwStations[i]);
+      if (results.length >= 12) break;
+    }
+    return results;
+  }
+
+  function showDropdown(results) {
+    var dd = document.getElementById('epw-search-dropdown');
+    dd.innerHTML = '';
+    if (results.length === 0) {
+      dd.style.display = 'none';
+      return;
+    }
+    results.forEach(function(station) {
+      var item = document.createElement('div');
+      item.className = 'epw-search-item';
+      item.title = stationFile(station);
+      item.textContent = station.n;
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault(); // prevent blur before click fires
+        selectStation(station);
+      });
+      dd.appendChild(item);
+    });
+    dd.style.display = 'block';
+  }
+
+  function hideDropdown() {
+    document.getElementById('epw-search-dropdown').style.display = 'none';
+  }
+
+  function setSearchStatus(msg, cls) {
+    var el = document.getElementById('epw-search-status');
+    el.textContent = msg;
+    el.className = cls || '';
+    if (cls !== 'loading') hideProgress();
+  }
+
+  function setProgress(pct) {
+    // pct 0-100 for determinate; -1 for indeterminate animated bar
+    var bar  = document.getElementById('epw-progress-bar');
+    var fill = document.getElementById('epw-progress-fill');
+    bar.style.display = 'block';
+    if (pct < 0) {
+      bar.classList.add('indeterminate');
+      fill.style.width = '';
+    } else {
+      bar.classList.remove('indeterminate');
+      fill.style.width = Math.min(100, pct) + '%';
+    }
+  }
+
+  function hideProgress() {
+    var bar = document.getElementById('epw-progress-bar');
+    if (bar) {
+      bar.style.display = 'none';
+      bar.classList.remove('indeterminate');
+      document.getElementById('epw-progress-fill').style.width = '0%';
+    }
+  }
+
+  // Stream a fetch Response body while updating the progress bar.
+  // Returns Promise<Uint8Array>.
+  function streamResponse(response) {
+    var contentLength = parseInt(response.headers.get('content-length') || '0', 10);
+    if (!response.body) {
+      // Fallback: no streaming support
+      setProgress(-1);
+      return response.arrayBuffer().then(function(buf) { return new Uint8Array(buf); });
+    }
+    var reader   = response.body.getReader();
+    var received = 0;
+    var chunks   = [];
+    function pump() {
+      return reader.read().then(function(result) {
+        if (result.done) {
+          var merged = new Uint8Array(received);
+          var offset = 0;
+          chunks.forEach(function(c) { merged.set(c, offset); offset += c.length; });
+          return merged;
+        }
+        chunks.push(result.value);
+        received += result.value.length;
+        var recKB = Math.round(received / 1024);
+        if (contentLength > 0) {
+          var pct = Math.min(99, Math.round(received / contentLength * 100));
+          var totKB = Math.round(contentLength / 1024);
+          setProgress(pct);
+          setSearchStatus('Downloading… ' + recKB + ' / ' + totKB + ' KB (' + pct + '%)', 'loading');
+        } else {
+          setProgress(-1);
+          setSearchStatus('Downloading… ' + recKB + ' KB received', 'loading');
+        }
+        return pump();
+      });
+    }
+    return pump();
+  }
+
+  function selectStation(station) {
+    hideDropdown();
+    document.getElementById('epw-search-input').value = station.n;
+    setSearchStatus('Downloading ' + stationFile(station) + '…', 'loading');
+    fetchEPWFromZip(station);
+  }
+
+  // CORS proxies tried in order
+  var CORS_PROXIES = [
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url='
+  ];
+
+  // Reconstruct full URL / filename from compact station record {n, u}
+  // If s._url is set (ad-hoc load), use it directly.
+  var EPW_BASE = 'https://climate.onebuilding.org/';
+  var EPW_SUFFIX = '_TMYx.2009-2023.zip';
+  function stationUrl(s)  { return s._url || (EPW_BASE + s.u + EPW_SUFFIX); }
+  function stationFile(s) { return s._url ? s._url.split('/').pop() : (s.u.split('/').pop() + EPW_SUFFIX); }
+
+  function fetchEPWFromZip(station, proxyIndex) {
+    proxyIndex = proxyIndex || 0;
+    if (proxyIndex >= CORS_PROXIES.length) {
+      setSearchStatus('Download failed: all CORS proxies exhausted. Try downloading manually from: ' + stationUrl(station), 'error');
+      return;
+    }
+    var proxyUrl = CORS_PROXIES[proxyIndex] + encodeURIComponent(stationUrl(station));
+    setSearchStatus('Connecting via proxy ' + (proxyIndex + 1) + '…', 'loading');
+
+    fetch(proxyUrl)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        setProgress(-1);
+        return streamResponse(res);
+      })
+      .then(function(uint8array) {
+        setProgress(100);
+        return JSZip.loadAsync(uint8array.buffer);
+      })
+      .then(function(zip) {
+        // Find the first .epw file in the zip
+        var epwName = null;
+        zip.forEach(function(relativePath) {
+          if (!epwName && relativePath.toLowerCase().endsWith('.epw')) {
+            epwName = relativePath;
+          }
+        });
+        if (!epwName) throw new Error('No .epw file found inside zip');
+        setSearchStatus('Extracting ' + epwName + '…', 'loading');
+        return zip.file(epwName).async('string');
+      })
+      .then(function(epwText) {
+        clearEPWCharts();
+        epw = epw2json(epwText);
+        document.getElementById('stationName').innerHTML =
+          'Weather for ' + epw.stationLocation +
+          ' <small style="font-size:12px;color:#888;">(TMYx 2009-2023, via <a href="' +
+          stationUrl(station) + '" target="_blank">OneBuilding</a>)</small>';
+        updateCharts(epw, unitSystem);
+        setSearchStatus('Loaded: ' + station.n, 'ok');
+      })
+      .catch(function(err) {
+        console.warn('Proxy ' + proxyIndex + ' failed:', err);
+        // Try next proxy
+        fetchEPWFromZip(station, proxyIndex + 1);
+      });
+  }
+
+  // Wire up the search input
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('epw-search-input');
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+      clearTimeout(searchDebounceTimer);
+      var q = input.value.trim();
+      if (q.length < 2) { hideDropdown(); return; }
+      searchDebounceTimer = setTimeout(function() {
+        var results = searchStations(q);
+        showDropdown(results);
+        if (results.length === 0 && epwStations.length > 0) {
+          setSearchStatus('No stations matched "' + q + '"');
+        } else if (epwStations.length > 0) {
+          setSearchStatus(results.length + ' result' + (results.length !== 1 ? 's' : ''));
+        }
+      }, 200);
+    });
+
+    input.addEventListener('keydown', function(e) {
+      var dd = document.getElementById('epw-search-dropdown');
+      var items = dd.querySelectorAll('.epw-search-item');
+      var active = dd.querySelector('.epw-search-item.active');
+      var idx = -1;
+      items.forEach(function(el, i) { if (el === active) idx = i; });
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        var next = Math.min(idx + 1, items.length - 1);
+        items.forEach(function(el) { el.classList.remove('active'); });
+        if (items[next]) items[next].classList.add('active');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        var prev = Math.max(idx - 1, 0);
+        items.forEach(function(el) { el.classList.remove('active'); });
+        if (items[prev]) items[prev].classList.add('active');
+      } else if (e.key === 'Enter') {
+        if (active) {
+          var nameText = active.textContent;
+          var match = epwStations.find(function(s) { return s.n === nameText; });
+          if (match) selectStation(match);
+        }
+        hideDropdown();
+      } else if (e.key === 'Escape') {
+        hideDropdown();
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      // Small delay so mousedown on dropdown item can fire first
+      setTimeout(hideDropdown, 150);
+    });
+  });
+
   function readSingleFile(file) {
     var f = file;
     if (f) {
@@ -286,42 +616,77 @@
     }
   };
 
-  //var file_path = encodeURIComponent("https://energyplus.net/weather-download/asia_wmo_region_2/RUS//RUS_Ekaterinburg.284400_IWEC/RUS_Ekaterinburg.284400_IWEC.epw");
-  //console.log("file_path:" + file_path)
-  //epw=C%3AUsersMatthew_2DesktopUSA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw  //?file=https%3A%2F%2Fenergyplus.net%2Fweather-download%2Fasia_wmo_region_2%2FRUS%2F%2FRUS_Ekaterinburg.284400_IWEC%2FRUS_Ekaterinburg.284400_IWEC.epw
+  // ---- URL parameter loading: ?url=https://...epw  or  ?url=https://...zip ----
+  // Also accepts legacy ?file= parameter.
+  // Security note: content is parsed as structured text, never eval'd. Low risk.
 
-  function parseURI(){
-
-    var parseParams = {
-	  file : ""
+  function loadEPWFromURL(url) {
+    var lurl = url.toLowerCase().split('?')[0];
+    if (lurl.endsWith('.epw')) {
+      var label = url.split('/').pop();
+      setSearchStatus('Fetching ' + label + '…', 'loading');
+      fetchEPWTextDirect(url, label, 0);
+    } else if (lurl.endsWith('.zip')) {
+      var synth = { n: url.split('/').pop().replace(/\.zip$/i, ''), _url: url };
+      selectStation(synth);
+    } else {
+      setSearchStatus('URL parameter must point to a .epw or .zip file.', 'error');
     }
+  }
 
-    var parse = window.location.search.replace("?","").split("&")
+  function fetchEPWTextDirect(url, label, proxyIndex) {
+    // Try direct fetch first (works if server sends CORS headers), then proxies.
+    var fetchUrl;
+    if (proxyIndex === 0) {
+      fetchUrl = url;
+    } else if (proxyIndex - 1 < CORS_PROXIES.length) {
+      fetchUrl = CORS_PROXIES[proxyIndex - 1] + encodeURIComponent(url);
+      setSearchStatus('Retrying via proxy ' + proxyIndex + '…', 'loading');
+    } else {
+      setSearchStatus('Download failed: could not fetch ' + url, 'error');
+      return;
+    }
+    fetch(fetchUrl)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        setProgress(-1);
+        return streamResponse(res);
+      })
+      .then(function(uint8array) {
+        setProgress(100);
+        var epwText = new TextDecoder('utf-8').decode(uint8array);
+        clearEPWCharts();
+        epw = epw2json(epwText);
+        document.getElementById('stationName').innerHTML =
+          'Weather for ' + epw.stationLocation +
+          ' <small style="font-size:12px;color:#888;">(<a href="' +
+          url + '" target="_blank">source</a>)</small>';
+        updateCharts(epw, unitSystem);
+        setSearchStatus('Loaded: ' + label, 'ok');
+      })
+      .catch(function(err) {
+        console.warn('Direct/proxy ' + proxyIndex + ' failed for .epw:', err);
+        fetchEPWTextDirect(url, label, proxyIndex + 1);
+      });
+  }
 
-	if (parse[0]=="") {
-		//no file
-		return;
-	}
-
-	parse.forEach(function(d){
-		keyValue = d.split("=");
-		parseParams[keyValue[0].toLowerCase()] = decodeURIComponent(keyValue[1]);
-	})
-
-	var epwURL = parseParams.file;
-	console.log("attempting to download file from:" + parseParams.file);
-
-	var userOK = confirm("DO YOU WANT TO DOWNLOAD THE .EPW FILE FROM THIS URL?: " + epwURL + "  YOU MAY NEED TO DISABLE YOUR POP-UP BLOCKER FOR THIS SITE")
-	if (userOK == true){
-	  window.open(epwURL,'_blank');
-	};
-
-	//need to do a cross-domain request to download the file and read it upon successful load
-	//http://stackoverflow.com/questions/15005500/loading-cross-domain-html-page-with-ajax
-	//http://www.ajax-cross-origin.com/
-	//for now, simply open the url in a new window and the user can drag and drop
-	//readSingleFile(epwFilePath);
-  };
+  function parseURI() {
+    var params = {};
+    var search = window.location.search.replace('?', '');
+    if (!search) return;
+    search.split('&').forEach(function(part) {
+      var kv = part.split('=');
+      if (kv.length >= 2) {
+        params[kv[0].toLowerCase()] = decodeURIComponent(kv.slice(1).join('='));
+      }
+    });
+    var targetUrl = params['url'] || params['file'];
+    if (!targetUrl) return;
+    // Defer until DOM is ready so status element exists
+    document.addEventListener('DOMContentLoaded', function() {
+      loadEPWFromURL(targetUrl);
+    });
+  }
   parseURI();
 
   fileInput = document.getElementById('fileinput');
