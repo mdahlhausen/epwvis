@@ -143,6 +143,59 @@
       animation: epw-indeterminate 1.2s infinite ease-in-out;
     }
 
+    /* ---- Heatmap variable checkbox dropdown ---- */
+    .hm-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .hm-var-label {
+      font-weight: normal;
+      white-space: nowrap;
+      margin: 0;
+    }
+    .hm-checkbox-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .hm-dropdown-toggle {
+      min-width: 180px;
+      text-align: left;
+    }
+    .hm-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 9999;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      min-width: 220px;
+      padding: 4px 0;
+    }
+    .hm-dropdown-menu.open {
+      display: block;
+    }
+    .hm-checkbox-item {
+      display: block;
+      padding: 5px 14px;
+      font-weight: normal;
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 0;
+      font-size: 13px;
+    }
+    .hm-checkbox-item:hover {
+      background: #e8f0fe;
+    }
+    .hm-checkbox-item input {
+      margin-right: 6px;
+      cursor: pointer;
+    }
+
 </style>
 
 </head>
@@ -309,21 +362,16 @@
                                 </div><!-- /tab-timeseries -->
 
                                 <div class="tab-pane" id="tab-heatmaps">
-                                    <div id="TemperatureHeatmap">
-                                        <h3>Drybulb Temperature
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempHeatmap','drybulb-temperature')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTempHeatmap','drybulb-temperature')">&#8659; PNG</button>
-                                        </h3>
-                                        <div id="epwTempHeatmap"></div>
+                                    <div class="hm-controls-row">
+                                        <label class="hm-var-label">Variables to display:</label>
+                                        <div class="hm-checkbox-dropdown" id="hmDropdown">
+                                            <button type="button" class="btn btn-default btn-sm hm-dropdown-toggle" id="hmDropdownToggle">
+                                                Select variables <span class="caret"></span>
+                                            </button>
+                                            <div class="hm-dropdown-menu" id="hmDropdownMenu"></div>
+                                        </div>
                                     </div>
-
-                                    <div id="CloudHeatmap">
-                                        <h3>Cloud Cover
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwCloudHeatmap','cloud-cover')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwCloudHeatmap','cloud-cover')">&#8659; PNG</button>
-                                        </h3>
-                                        <div id="epwCloudHeatmap"></div>
-                                    </div>
+                                    <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
 
                                 <div class="tab-pane" id="tab-windrose">
@@ -742,8 +790,7 @@
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
     epwTimeseriesCharts(epw);
-    epwTempHeatmap(epw);
-    epwCloudHeatmap(epw);
+    epwHeatmapCharts(epw);
     epwWindRose(epw);
     epwPsychroChart(epw);
     epwValueFilter(epw);
@@ -765,8 +812,6 @@
 
   function downloadAllSVG() {
     var charts = [
-      { id: 'epwTempHeatmap',            name: 'drybulb-temperature' },
-      { id: 'epwCloudHeatmap',           name: 'cloud-cover' },
       { id: 'epwWindRose',               name: 'wind-rose' },
       { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
       { id: 'month-chart',               name: 'month' },
@@ -782,13 +827,18 @@
       var svgEl = document.querySelector('#' + c.id + ' svg');
       if (svgEl) { any = true; downloadSVG(c.id, c.name); }
     });
+    // Dynamic heatmap charts
+    var hmContainer = document.getElementById('heatmapChartsContainer');
+    if (hmContainer) {
+      hmContainer.querySelectorAll('[id^="epwHeatmap-"]').forEach(function(div) {
+        if (div.querySelector('svg')) { any = true; downloadSVG(div.id, div.id.replace('epwHeatmap-', '') + '-heatmap'); }
+      });
+    }
     if (!any) alert('No charts to export. Load an EPW file first.');
   }
 
   function downloadAllPNG() {
     var charts = [
-      { id: 'epwTempHeatmap',            name: 'drybulb-temperature' },
-      { id: 'epwCloudHeatmap',           name: 'cloud-cover' },
       { id: 'epwWindRose',               name: 'wind-rose' },
       { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
       { id: 'month-chart',               name: 'month' },
@@ -811,6 +861,18 @@
         delay += 300;
       }
     });
+    // Dynamic heatmap charts
+    var hmContainer = document.getElementById('heatmapChartsContainer');
+    if (hmContainer) {
+      hmContainer.querySelectorAll('[id^="epwHeatmap-"]').forEach(function(div) {
+        if (div.querySelector('svg')) {
+          any = true;
+          var divId = div.id, name = divId.replace('epwHeatmap-', '') + '-heatmap';
+          setTimeout(function(i, n) { return function() { downloadPNG(i, n); }; }(divId, name), delay);
+          delay += 300;
+        }
+      });
+    }
     if (!any) alert('No charts to export. Load an EPW file first.');
   }
 
