@@ -346,6 +346,8 @@
                                         <select id="tsVariableSelect" class="form-control ts-var-select"></select>
                                     </div>
                                     <h4 class="ts-section-header">Annual Timeseries
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesAnnual','timeseries-annual')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesAnnual','timeseries-annual')">&#8659; PNG</button>
                                         <span class="ts-legend-hint">
                                             <span class="ts-swatch ts-swatch-grey"></span>All data (min–max range + daily avg)
                                             &nbsp;
@@ -356,6 +358,8 @@
                                         <div id="epwTimeseriesAnnual"></div>
                                     </div>
                                     <h4 class="ts-section-header">Average Daily Profile by Month
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; PNG</button>
                                         <span class="ts-legend-hint">One panel per month &nbsp;|&nbsp; Grey band = all-data min–max &nbsp;|&nbsp; Color band + line = filtered avg &amp; min–max</span>
                                     </h4>
                                     <div id="epwTimeseriesDailyProfile"></div>
@@ -812,6 +816,8 @@
 
   function downloadAllSVG() {
     var charts = [
+      { id: 'epwTimeseriesAnnual',       name: 'timeseries-annual' },
+      { id: 'epwTimeseriesDailyProfile', name: 'timeseries-daily-profile' },
       { id: 'epwWindRose',               name: 'wind-rose' },
       { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
       { id: 'month-chart',               name: 'month' },
@@ -839,6 +845,8 @@
 
   function downloadAllPNG() {
     var charts = [
+      { id: 'epwTimeseriesAnnual',       name: 'timeseries-annual' },
+      { id: 'epwTimeseriesDailyProfile', name: 'timeseries-daily-profile' },
       { id: 'epwWindRose',               name: 'wind-rose' },
       { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
       { id: 'month-chart',               name: 'month' },
