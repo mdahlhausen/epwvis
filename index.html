@@ -6,7 +6,68 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.1" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.2" type="text/css"/>
+
+<!-- Dynamic color overrides (updated by settings panel JS) -->
+<style id="epv-dyn-colors">
+  .foreground.bar { fill: steelblue; }
+  .brush rect.extent { fill: steelblue; fill-opacity: .125; }
+  .ts-swatch-blue { background: steelblue; }
+</style>
+
+<style>
+/* ---- Settings dropdown panel ---- */
+#settingsBtnWrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+#settingsPanel {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 9100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  padding: 12px 16px 14px;
+  min-width: 300px;
+  font-size: 13px;
+  color: #333;
+}
+#settingsPanel.open { display: block; }
+.settings-section-label {
+  font-weight: bold;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 7px 0;
+}
+.settings-separator { border-top: 1px solid #eee; margin: 11px 0; }
+.plot-color-swatches { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.plot-color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  transition: border-color .1s;
+}
+.plot-color-swatch:hover { border-color: #555; }
+.plot-color-swatch.selected { border-color: #111; box-shadow: 0 0 0 1px #111; }
+.hm-scheme-options { display: flex; flex-direction: column; gap: 5px; }
+.hm-scheme-row {
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; padding: 3px 5px; border-radius: 3px;
+}
+.hm-scheme-row:hover { background: #f4f4f4; }
+.hm-scheme-row.selected { background: #e8f0fe; }
+.hm-scheme-ramp { width: 90px; height: 13px; border-radius: 2px; flex-shrink: 0; }
+.hm-scheme-name { font-size: 12px; color: #333; }
+</style>
 
 <!-- load javascript libraries -->
 <script type="text/javascript" src="./lib/js/jQuery/jquery-2.2.4.min.js"></script>
@@ -15,8 +76,10 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.1"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.2"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.3"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
+<script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
+<script type="text/javascript" src="./data/stations.js"></script>
 
 <style>
 	html {
@@ -73,6 +136,179 @@
       display: none;
     }
 
+    /* ---- Location search bar ---- */
+    #epw-search-container {
+      position: relative;
+      display: inline-block;
+    }
+    #epw-search-input {
+      width: 280px;
+    }
+    #epw-search-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 9999;
+      width: 380px;
+      max-height: 260px;
+      overflow-y: auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 0 0 4px 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .epw-search-item {
+      padding: 6px 10px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #f0f0f0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .epw-search-item:hover, .epw-search-item.active {
+      background: #e8f0fe;
+    }
+    #epw-search-status {
+      font-size: 12px;
+      color: #888;
+      margin-top: 3px;
+      min-height: 16px;
+    }
+    #epw-search-status.error { color: #c0392b; }
+    #epw-search-status.loading { color: #2980b9; }
+    #epw-search-status.ok { color: #27ae60; }
+    #epw-progress-bar {
+      display: none;
+      height: 4px;
+      background: #e0e0e0;
+      border-radius: 2px;
+      margin-top: 4px;
+      overflow: hidden;
+      width: 280px;
+    }
+    #epw-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: #2980b9;
+      border-radius: 2px;
+      transition: width 0.12s ease;
+    }
+    @keyframes epw-indeterminate {
+      0%   { width: 0%;  margin-left: 0%; }
+      50%  { width: 45%; margin-left: 25%; }
+      100% { width: 0%;  margin-left: 100%; }
+    }
+    #epw-progress-bar.indeterminate #epw-progress-fill {
+      animation: epw-indeterminate 1.2s infinite ease-in-out;
+    }
+
+    /* ---- Heatmap variable checkbox dropdown ---- */
+    .hm-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .hm-var-label {
+      font-weight: normal;
+      white-space: nowrap;
+      margin: 0;
+    }
+    .hm-checkbox-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .hm-dropdown-toggle {
+      min-width: 180px;
+      text-align: left;
+    }
+    .hm-dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      z-index: 9999;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      min-width: 220px;
+      padding: 4px 0;
+    }
+    .hm-dropdown-menu.open {
+      display: block;
+    }
+    .hm-checkbox-item {
+      display: block;
+      padding: 5px 14px;
+      font-weight: normal;
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 0;
+      font-size: 13px;
+    }
+    .hm-checkbox-item:hover {
+      background: #e8f0fe;
+    }
+    .hm-checkbox-item input {
+      margin-right: 6px;
+      cursor: pointer;
+    }
+    .hm-filter-info {
+      font-size: smaller;
+      margin: 0 0 8px 0;
+      color: #555;
+    }
+    .vf-var-dropdown-wrap {
+      margin: 6px 0 4px 0;
+    }
+
+    #tab-heatmaps {
+      min-height: 480px;
+    }
+    /* ---- Tabular Data tab ---- */
+    .tbl-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .tbl-var-label  { font-weight: normal; white-space: nowrap; margin: 0; }
+    .tbl-var-select { width: 260px; display: inline-block; }
+    .tbl-filter-info { font-size: smaller; color: #555; margin: 0 0 10px 0; }
+    #tblTableContainer table {
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 600px;
+    }
+    #tblTableContainer th,
+    #tblTableContainer td {
+      border: 1px solid #ddd;
+      padding: 5px 10px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    #tblTableContainer th {
+      background: #f5f5f5;
+      font-weight: 600;
+      text-align: center;
+    }
+    #tblTableContainer td:first-child,
+    #tblTableContainer th:first-child {
+      text-align: left;
+    }
+    #tblTableContainer tr.tbl-year-row td {
+      font-weight: 600;
+      background: #f0f4ff;
+    }
+    #tblTableContainer tr:hover td {
+      background: #f9f9f9;
+    }
+    #tblTableContainer tr.tbl-year-row:hover td {
+      background: #e8eeff;
+    }
 </style>
 
 </head>
@@ -103,7 +339,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav in" id="side-menu">
                 <li>
-                    <a href="#TemperatureFloodplot">Temperature Floodplot</a>
+                    <a href="#TemperatureHeatmap">Temperature Heatmap</a>
                 </li>
                 <li>
                     <a href="#Filter">Filter</a>
@@ -135,34 +371,59 @@
                                 drag and drop EPW file here
                             </div>
                           </li>
+                          <li style="text-align:center; padding-right:15px; padding-left:15px;"><h3>OR</h3></li>
+                          <li style="padding-top:6px;">
+                            <div id="epw-search-container">
+                              <div style="font-size:11px; color:#888; margin-bottom:3px;">TMYx 2009–2023 weather files from <a href="https://climate.onebuilding.org" target="_blank">OneBuilding</a></div>
+                              <input type="text" id="epw-search-input"
+                                class="form-control input-sm"
+                                placeholder="Search location (e.g. Denver CO, Paris, Tokyo)..."
+                                autocomplete="off">
+                              <div id="epw-search-dropdown"></div>
+                              <div id="epw-search-status">Loading station list…</div>
+                              <div id="epw-progress-bar"><div id="epw-progress-fill"></div></div>
+                            </div>
+                          </li>
                         </ul>
 
                         <ul class="nav navbar-nav navbar-right">
-                          <li>
-                          Unit System:
-                          <div class="btn-group" data-toggle="buttons">
-                            <button type="button" class="btn btn-default navbar-btn active" id="buttonIP">IP</button>
-                            <button type="button" class="btn btn-default navbar-btn" id="buttonSI">SI</button>
-<!--                             <label type="button" class="btn btn-default navbar-btn active">
-                              <input type="radio" id="buttonIP">IP</input>
-                            </label>
-                            <label type="button" class="btn btn-default navbar-btn">
-                              <input type="radio" id="buttonSI">SI</input>
-                            </label> -->
-                          </div>
+                          <li style="display:flex; align-items:center; gap:10px; padding:0 6px;">
+                            <div id="settingsBtnWrap" style="position:relative;">
+                              <button id="settingsBtn" class="btn btn-default" style="font-size:15px;">Settings</button>
+                              <div id="settingsPanel">
+                                <div class="settings-section-label">Plot Color</div>
+                                <div class="plot-color-swatches" id="plotColorSwatches"></div>
+                                <div class="settings-separator"></div>
+                                <div class="settings-section-label">Heatmap Color Scheme</div>
+                                <div class="hm-scheme-options" id="hmSchemeOptions"></div>
+                              </div>
+                            </div>
+                            <span style="font-size:15px; color:#555; white-space:nowrap;">Unit System:</span>
+                            <div class="btn-group" data-toggle="buttons">
+                              <button type="button" class="btn btn-default active" id="buttonIP">IP</button>
+                              <button type="button" class="btn btn-default" id="buttonSI">SI</button>
+                            </div>
                           </li>
                         </ul>
                     </div>  <!-- second nav bar -->
 
-                    <h3 id="stationName"></h3>
+                    <h3 id="stationName" style="display:inline-block; margin-right:8px;"></h3>
+                    <span id="downloadAllBtns" style="display:none;">
+                    <button onclick="downloadAllSVG()" class="btn btn-default btn-sm" style="vertical-align:middle;">Download All SVG</button>
+                    <button onclick="downloadAllPNG()" class="btn btn-default btn-sm" style="vertical-align:middle;">Download All PNG</button>
+                    </span>
 
                     <div id="epwChartDiv">
 
                         <div id="epwSidebar">
                             <h3 style="margin-top:8px; margin-bottom:4px;">Value Filter
-                                <button onclick="resetAll()" class="btn btn-default btn-xs" style="vertical-align:middle;">Reset Filters</button>
-                                <button onclick="downloadAllSVG()" class="btn btn-default btn-xs" style="vertical-align:middle;">&#8659; All SVG</button>
-                                <button onclick="downloadAllPNG()" class="btn btn-default btn-xs" style="vertical-align:middle;">&#8659; All PNG</button>
+                                <button onclick="resetAll()" class="btn btn-default btn-sm" style="vertical-align:middle;">Reset Filters</button>
+                                <span style="display:inline-block; vertical-align:middle;">
+                                  <div class="hm-checkbox-dropdown" id="vfDropdown">
+                                    <button type="button" class="btn btn-default btn-sm hm-dropdown-toggle" id="vfDropdownToggle">Select Value Filters <span class="caret"></span></button>
+                                    <div class="hm-dropdown-menu" id="vfDropdownMenu"></div>
+                                  </div>
+                                </span>
                             </h3>
                             <p style="font-size:smaller; margin-bottom:4px;"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</p>
                             <p id="tempFilterExamples"></p>
@@ -174,6 +435,7 @@
                               <div id="hour-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Hour</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('hour-chart','hour')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('hour-chart','hour')">&#8659; PNG</button></div></div>
                               </div>
+
                               <div id="drybulb-temperature-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Drybulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
@@ -189,13 +451,36 @@
                               <div id="enthalpy-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Enthalpy</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('enthalpy-chart','enthalpy-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('enthalpy-chart','enthalpy-filter')">&#8659; PNG</button></div></div>
                               </div>
+                              <div id="humidity-ratio-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Humidity Ratio</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="ghi-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Global Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('ghi-chart','ghi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ghi-chart','ghi-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="dni-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Direct Normal Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dni-chart','dni-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dni-chart','dni-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="dhi-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Diffuse Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dhi-chart','dhi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dhi-chart','dhi-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="wind-speed-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="sky-cover-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="pressure-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
+                              </div>
                             </div>
                         </div>
 
                         <div id="epwMain">
                             <!-- Tab navigation -->
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
-                                <li class="active"><a href="#tab-floodplots" data-toggle="tab">Floodplots</a></li>
+                                <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
+                                <li><a href="#tab-heatmaps" data-toggle="tab">Heatmaps</a></li>
+                                <li><a href="#tab-tabular" data-toggle="tab">Tabular Data</a></li>
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
                             </ul>
@@ -203,23 +488,54 @@
                             <!-- Tab content -->
                             <div class="tab-content">
 
-                                <div class="tab-pane active" id="tab-floodplots">
-                                    <div id="TemperatureFloodplot">
-                                        <h3>Drybulb Temperature Floodplot
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempFloodPlot','drybulb-temperature')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTempFloodPlot','drybulb-temperature')">&#8659; PNG</button>
-                                        </h3>
-                                        <div id="epwTempFloodPlot"></div>
+                                <div class="tab-pane active" id="tab-timeseries">
+                                    <div class="ts-controls-row">
+                                        <label for="tsVariableSelect" class="ts-var-label">Variable:</label>
+                                        <select id="tsVariableSelect" class="form-control ts-var-select"></select>
                                     </div>
+                                    <h4 class="ts-section-header">Annual Timeseries
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesAnnual','timeseries-annual')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesAnnual','timeseries-annual')">&#8659; PNG</button>
+                                        <span class="ts-legend-hint">
+                                            <span class="ts-swatch ts-swatch-grey"></span>All data (min–max range + daily avg)
+                                            &nbsp;
+                                            <span class="ts-swatch ts-swatch-blue"></span>Filtered data (min–max range + daily avg)
+                                        </span>
+                                    </h4>
+                                    <div id="epwTimeseriesAnnualWrap">
+                                        <div id="epwTimeseriesAnnual"></div>
+                                    </div>
+                                    <h4 class="ts-section-header">Average Daily Profile by Month
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; PNG</button>
+                                        <span class="ts-legend-hint">One panel per month &nbsp;|&nbsp; Grey band = all-data min–max &nbsp;|&nbsp; Color band + line = filtered avg &amp; min–max</span>
+                                    </h4>
+                                    <div id="epwTimeseriesDailyProfile"></div>
+                                </div><!-- /tab-timeseries -->
 
-                                    <div id="CloudFloodplot">
-                                        <h3>Cloud Cover Floodplot
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwCloudFloodPlot','cloud-cover')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwCloudFloodPlot','cloud-cover')">&#8659; PNG</button>
-                                        </h3>
-                                        <div id="epwCloudFloodPlot"></div>
+                                <div class="tab-pane" id="tab-heatmaps">
+                                    <div class="hm-controls-row">
+                                        <label class="hm-var-label">Variables to display:</label>
+                                        <div class="hm-checkbox-dropdown" id="hmDropdown">
+                                            <button type="button" class="btn btn-default btn-sm hm-dropdown-toggle" id="hmDropdownToggle">
+                                                Select variables <span class="caret"></span>
+                                            </button>
+                                            <div class="hm-dropdown-menu" id="hmDropdownMenu"></div>
+                                        </div>
                                     </div>
-                                </div><!-- /tab-floodplots -->
+                                    <p id="hmFilterInfo" class="hm-filter-info"></p>
+                                    <div id="heatmapChartsContainer"></div>
+                                </div><!-- /tab-heatmaps -->
+
+                                <div class="tab-pane" id="tab-tabular">
+                                    <div class="tbl-controls-row">
+                                        <label for="tblVariableSelect" class="tbl-var-label">Variable:</label>
+                                        <select id="tblVariableSelect" class="form-control tbl-var-select"></select>
+                                        <button id="tblDownloadCSV" class="btn btn-default btn-sm" style="margin-left:12px;">&#8659; CSV</button>
+                                    </div>
+                                    <p id="tblFilterInfo" class="tbl-filter-info"></p>
+                                    <div id="tblTableContainer"></div>
+                                </div><!-- /tab-tabular -->
 
                                 <div class="tab-pane" id="tab-windrose">
                                     <div id="WindRose">
@@ -260,6 +576,353 @@
   var epw = {};
   var unitSystem = "IP";
 
+  // ---- User appearance settings ----
+  window._plotColor = 'steelblue';
+  window._hmScheme  = 'rainbow';
+
+  var _settingsPlotColors = [
+    { value: 'steelblue', label: 'Steel Blue'   },
+    { value: '#e05b4b',   label: 'Coral'         },
+    { value: '#3a9a4a',   label: 'Forest Green'  },
+    { value: '#7b68c8',   label: 'Slate Purple'  },
+    { value: '#26a69a',   label: 'Teal'          },
+    { value: '#607d8b',   label: 'Slate Gray'    }
+  ];
+
+  var _settingsHmSchemes = [
+    { value: 'rainbow', label: 'Rainbow',    gradient: 'linear-gradient(to right, darkblue, blue, cyan, greenyellow, yellow, orange, red, darkred)' },
+    { value: 'rd-bu',   label: 'Red – Blue', gradient: 'linear-gradient(to right, #b2182b, #d6604d, #f4a582, #f7f7f7, #92c5de, #4393c3, #2166ac, #053061)' },
+    { value: 'viridis', label: 'Viridis',    gradient: 'linear-gradient(to right, #440154, #414487, #2a788e, #22a884, #7ad151, #fde725)' },
+    { value: 'inferno', label: 'Inferno',    gradient: 'linear-gradient(to right, #000004, #3f0f70, #8c2981, #dd513b, #fba40a, #fcffa4)' },
+    { value: 'blues',   label: 'Blues',      gradient: 'linear-gradient(to right, #f7fbff, #c6dbef, #6baed6, #2171b5, #08306b)' }
+  ];
+
+  function applyDynColors(color) {
+    window._plotColor = color;
+    var s = document.getElementById('epv-dyn-colors');
+    if (s) {
+      s.textContent = '.foreground.bar { fill: ' + color + '; }\n'
+        + '.brush rect.extent { fill: ' + color + '; fill-opacity: .125; }\n'
+        + '.ts-swatch-blue { background: ' + color + '; }';
+    }
+    // Update existing SVG elements in-place (no full redraw needed)
+    d3.selectAll('.foreground.bar').style('fill', color);
+    d3.selectAll('.polar-selection').style('fill', color).style('stroke', color);
+    d3.selectAll('path.pfg').style('fill', color);
+    // Update timeseries paths via redraw if data is loaded
+    if (epw && epw.stationLocation) { updateCharts(epw, unitSystem); }
+  }
+
+  function applyHmScheme(scheme) {
+    window._hmScheme = scheme;
+    if (epw && epw.stationLocation) { updateCharts(epw, unitSystem); }
+  }
+
+  function buildSettingsPanel() {
+    var swatchWrap = document.getElementById('plotColorSwatches');
+    var schemeWrap = document.getElementById('hmSchemeOptions');
+    if (!swatchWrap || !schemeWrap) return;
+
+    swatchWrap.innerHTML = '';
+    _settingsPlotColors.forEach(function(c) {
+      var el = document.createElement('span');
+      el.className = 'plot-color-swatch' + (c.value === window._plotColor ? ' selected' : '');
+      el.style.background = c.value;
+      el.title = c.label;
+      el.addEventListener('click', function() {
+        document.querySelectorAll('.plot-color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+        el.classList.add('selected');
+        applyDynColors(c.value);
+      });
+      swatchWrap.appendChild(el);
+    });
+
+    schemeWrap.innerHTML = '';
+    _settingsHmSchemes.forEach(function(s) {
+      var row = document.createElement('div');
+      row.className = 'hm-scheme-row' + (s.value === window._hmScheme ? ' selected' : '');
+      var ramp = document.createElement('div');
+      ramp.className = 'hm-scheme-ramp';
+      ramp.style.background = s.gradient;
+      var lbl = document.createElement('span');
+      lbl.className = 'hm-scheme-name';
+      lbl.textContent = s.label;
+      row.appendChild(ramp);
+      row.appendChild(lbl);
+      row.addEventListener('click', function() {
+        document.querySelectorAll('.hm-scheme-row').forEach(function(r) { r.classList.remove('selected'); });
+        row.classList.add('selected');
+        window._hmScheme = s.value;
+        applyHmScheme(s.value);
+      });
+      schemeWrap.appendChild(row);
+    });
+  }
+
+  // Toggle settings panel open/close
+  document.addEventListener('click', function(e) {
+    var panel = document.getElementById('settingsPanel');
+    var btn   = document.getElementById('settingsBtn');
+    if (!panel || !btn) return;
+    if (btn.contains(e.target)) {
+      var isOpen = panel.classList.contains('open');
+      if (!isOpen) { buildSettingsPanel(); }
+      panel.classList.toggle('open');
+      return;
+    }
+    if (!panel.contains(e.target)) {
+      panel.classList.remove('open');
+    }
+  });
+
+  // ---- Location search: station data and helpers ----
+  var epwStations = [];        // loaded from stations.json
+  var searchDebounceTimer = null;
+
+  // Station index is pre-loaded as a global via <script src="data/stations.js">
+  // (works with file:// URLs and HTTP alike — no fetch() required)
+  (function() {
+    var statusEl = document.getElementById('epw-search-status');
+    if (typeof ONE_BUILDING_EPW_STATIONS !== 'undefined' && ONE_BUILDING_EPW_STATIONS.length) {
+      epwStations = ONE_BUILDING_EPW_STATIONS;
+      statusEl.textContent = epwStations.length.toLocaleString() + ' stations available';
+      statusEl.className = '';
+    } else {
+      statusEl.textContent = 'Station list not loaded — ensure data/stations.js is present.';
+      statusEl.className = 'error';
+    }
+  })();
+
+  function searchStations(query) {
+    if (!query || query.trim().length < 2) return [];
+    var words = query.trim().toLowerCase().split(/\s+/);
+    var results = [];
+    for (var i = 0; i < epwStations.length; i++) {
+      var name = epwStations[i].n.toLowerCase();
+      var match = words.every(function(w) { return name.indexOf(w) !== -1; });
+      if (match) results.push(epwStations[i]);
+      if (results.length >= 12) break;
+    }
+    return results;
+  }
+
+  function showDropdown(results) {
+    var dd = document.getElementById('epw-search-dropdown');
+    dd.innerHTML = '';
+    if (results.length === 0) {
+      dd.style.display = 'none';
+      return;
+    }
+    results.forEach(function(station) {
+      var item = document.createElement('div');
+      item.className = 'epw-search-item';
+      item.title = stationFile(station);
+      item.textContent = station.n;
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault(); // prevent blur before click fires
+        selectStation(station);
+      });
+      dd.appendChild(item);
+    });
+    dd.style.display = 'block';
+  }
+
+  function hideDropdown() {
+    document.getElementById('epw-search-dropdown').style.display = 'none';
+  }
+
+  function setSearchStatus(msg, cls) {
+    var el = document.getElementById('epw-search-status');
+    el.textContent = msg;
+    el.className = cls || '';
+    if (cls !== 'loading') hideProgress();
+  }
+
+  function setProgress(pct) {
+    // pct 0-100 for determinate; -1 for indeterminate animated bar
+    var bar  = document.getElementById('epw-progress-bar');
+    var fill = document.getElementById('epw-progress-fill');
+    bar.style.display = 'block';
+    if (pct < 0) {
+      bar.classList.add('indeterminate');
+      fill.style.width = '';
+    } else {
+      bar.classList.remove('indeterminate');
+      fill.style.width = Math.min(100, pct) + '%';
+    }
+  }
+
+  function hideProgress() {
+    var bar = document.getElementById('epw-progress-bar');
+    if (bar) {
+      bar.style.display = 'none';
+      bar.classList.remove('indeterminate');
+      document.getElementById('epw-progress-fill').style.width = '0%';
+    }
+  }
+
+  // Stream a fetch Response body while updating the progress bar.
+  // Returns Promise<Uint8Array>.
+  function streamResponse(response) {
+    var contentLength = parseInt(response.headers.get('content-length') || '0', 10);
+    if (!response.body) {
+      // Fallback: no streaming support
+      setProgress(-1);
+      return response.arrayBuffer().then(function(buf) { return new Uint8Array(buf); });
+    }
+    var reader   = response.body.getReader();
+    var received = 0;
+    var chunks   = [];
+    function pump() {
+      return reader.read().then(function(result) {
+        if (result.done) {
+          var merged = new Uint8Array(received);
+          var offset = 0;
+          chunks.forEach(function(c) { merged.set(c, offset); offset += c.length; });
+          return merged;
+        }
+        chunks.push(result.value);
+        received += result.value.length;
+        var recKB = Math.round(received / 1024);
+        if (contentLength > 0) {
+          var pct = Math.min(99, Math.round(received / contentLength * 100));
+          var totKB = Math.round(contentLength / 1024);
+          setProgress(pct);
+          setSearchStatus('Downloading… ' + recKB + ' / ' + totKB + ' KB (' + pct + '%)', 'loading');
+        } else {
+          setProgress(-1);
+          setSearchStatus('Downloading… ' + recKB + ' KB received', 'loading');
+        }
+        return pump();
+      });
+    }
+    return pump();
+  }
+
+  function selectStation(station) {
+    hideDropdown();
+    document.getElementById('epw-search-input').value = station.n;
+    setSearchStatus('Downloading ' + stationFile(station) + '…', 'loading');
+    fetchEPWFromZip(station);
+  }
+
+  // CORS proxies tried in order
+  var CORS_PROXIES = [
+    'https://corsproxy.io/?url=',
+    'https://api.allorigins.win/raw?url='
+  ];
+
+  // Reconstruct full URL / filename from compact station record {n, u}
+  // If s._url is set (ad-hoc load), use it directly.
+  var EPW_BASE = 'https://climate.onebuilding.org/';
+  var EPW_SUFFIX = '_TMYx.2009-2023.zip';
+  function stationUrl(s)  { return s._url || (EPW_BASE + s.u + EPW_SUFFIX); }
+  function stationFile(s) { return s._url ? s._url.split('/').pop() : (s.u.split('/').pop() + EPW_SUFFIX); }
+
+  function fetchEPWFromZip(station, proxyIndex) {
+    proxyIndex = proxyIndex || 0;
+    if (proxyIndex >= CORS_PROXIES.length) {
+      setSearchStatus('Download failed: all CORS proxies exhausted. Try downloading manually from: ' + stationUrl(station), 'error');
+      return;
+    }
+    var proxyUrl = CORS_PROXIES[proxyIndex] + encodeURIComponent(stationUrl(station));
+    setSearchStatus('Connecting via proxy ' + (proxyIndex + 1) + '…', 'loading');
+
+    fetch(proxyUrl)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        setProgress(-1);
+        return streamResponse(res);
+      })
+      .then(function(uint8array) {
+        setProgress(100);
+        return JSZip.loadAsync(uint8array.buffer);
+      })
+      .then(function(zip) {
+        // Find the first .epw file in the zip
+        var epwName = null;
+        zip.forEach(function(relativePath) {
+          if (!epwName && relativePath.toLowerCase().endsWith('.epw')) {
+            epwName = relativePath;
+          }
+        });
+        if (!epwName) throw new Error('No .epw file found inside zip');
+        setSearchStatus('Extracting ' + epwName + '…', 'loading');
+        return zip.file(epwName).async('string');
+      })
+      .then(function(epwText) {
+        clearEPWCharts();
+        epw = epw2json(epwText);
+        document.getElementById('stationName').innerHTML =
+          'Weather for ' + epw.stationLocation +
+          ' <small style="font-size:12px;color:#888;">(TMYx 2009-2023, via <a href="' +
+          stationUrl(station) + '" target="_blank">OneBuilding</a>)</small>';
+        document.getElementById('downloadAllBtns').style.display = '';
+        updateCharts(epw, unitSystem);
+        setSearchStatus('Loaded: ' + station.n, 'ok');
+      })
+      .catch(function(err) {
+        console.warn('Proxy ' + proxyIndex + ' failed:', err);
+        // Try next proxy
+        fetchEPWFromZip(station, proxyIndex + 1);
+      });
+  }
+
+  // Wire up the search input
+  document.addEventListener('DOMContentLoaded', function() {
+    var input = document.getElementById('epw-search-input');
+    if (!input) return;
+
+    input.addEventListener('input', function() {
+      clearTimeout(searchDebounceTimer);
+      var q = input.value.trim();
+      if (q.length < 2) { hideDropdown(); return; }
+      searchDebounceTimer = setTimeout(function() {
+        var results = searchStations(q);
+        showDropdown(results);
+        if (results.length === 0 && epwStations.length > 0) {
+          setSearchStatus('No stations matched "' + q + '"');
+        } else if (epwStations.length > 0) {
+          setSearchStatus(results.length + ' result' + (results.length !== 1 ? 's' : ''));
+        }
+      }, 200);
+    });
+
+    input.addEventListener('keydown', function(e) {
+      var dd = document.getElementById('epw-search-dropdown');
+      var items = dd.querySelectorAll('.epw-search-item');
+      var active = dd.querySelector('.epw-search-item.active');
+      var idx = -1;
+      items.forEach(function(el, i) { if (el === active) idx = i; });
+
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        var next = Math.min(idx + 1, items.length - 1);
+        items.forEach(function(el) { el.classList.remove('active'); });
+        if (items[next]) items[next].classList.add('active');
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        var prev = Math.max(idx - 1, 0);
+        items.forEach(function(el) { el.classList.remove('active'); });
+        if (items[prev]) items[prev].classList.add('active');
+      } else if (e.key === 'Enter') {
+        if (active) {
+          var nameText = active.textContent;
+          var match = epwStations.find(function(s) { return s.n === nameText; });
+          if (match) selectStation(match);
+        }
+        hideDropdown();
+      } else if (e.key === 'Escape') {
+        hideDropdown();
+      }
+    });
+
+    input.addEventListener('blur', function() {
+      // Small delay so mousedown on dropdown item can fire first
+      setTimeout(hideDropdown, 150);
+    });
+  });
+
   function readSingleFile(file) {
     var f = file;
     if (f) {
@@ -278,6 +941,7 @@
 
 		//console.log(epw);
 		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
+        document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem)
       };
 	  r.readAsText(f);
@@ -286,42 +950,78 @@
     }
   };
 
-  //var file_path = encodeURIComponent("https://energyplus.net/weather-download/asia_wmo_region_2/RUS//RUS_Ekaterinburg.284400_IWEC/RUS_Ekaterinburg.284400_IWEC.epw");
-  //console.log("file_path:" + file_path)
-  //epw=C%3AUsersMatthew_2DesktopUSA_IL_Chicago-OHare.Intl.AP.725300_TMY3.epw  //?file=https%3A%2F%2Fenergyplus.net%2Fweather-download%2Fasia_wmo_region_2%2FRUS%2F%2FRUS_Ekaterinburg.284400_IWEC%2FRUS_Ekaterinburg.284400_IWEC.epw
+  // ---- URL parameter loading: ?url=https://...epw  or  ?url=https://...zip ----
+  // Also accepts legacy ?file= parameter.
+  // Security note: content is parsed as structured text, never eval'd. Low risk.
 
-  function parseURI(){
-
-    var parseParams = {
-	  file : ""
+  function loadEPWFromURL(url) {
+    var lurl = url.toLowerCase().split('?')[0];
+    if (lurl.endsWith('.epw')) {
+      var label = url.split('/').pop();
+      setSearchStatus('Fetching ' + label + '…', 'loading');
+      fetchEPWTextDirect(url, label, 0);
+    } else if (lurl.endsWith('.zip')) {
+      var synth = { n: url.split('/').pop().replace(/\.zip$/i, ''), _url: url };
+      selectStation(synth);
+    } else {
+      setSearchStatus('URL parameter must point to a .epw or .zip file.', 'error');
     }
+  }
 
-    var parse = window.location.search.replace("?","").split("&")
+  function fetchEPWTextDirect(url, label, proxyIndex) {
+    // Try direct fetch first (works if server sends CORS headers), then proxies.
+    var fetchUrl;
+    if (proxyIndex === 0) {
+      fetchUrl = url;
+    } else if (proxyIndex - 1 < CORS_PROXIES.length) {
+      fetchUrl = CORS_PROXIES[proxyIndex - 1] + encodeURIComponent(url);
+      setSearchStatus('Retrying via proxy ' + proxyIndex + '…', 'loading');
+    } else {
+      setSearchStatus('Download failed: could not fetch ' + url, 'error');
+      return;
+    }
+    fetch(fetchUrl)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        setProgress(-1);
+        return streamResponse(res);
+      })
+      .then(function(uint8array) {
+        setProgress(100);
+        var epwText = new TextDecoder('utf-8').decode(uint8array);
+        clearEPWCharts();
+        epw = epw2json(epwText);
+        document.getElementById('stationName').innerHTML =
+          'Weather for ' + epw.stationLocation +
+          ' <small style="font-size:12px;color:#888;">(<a href="' +
+          url + '" target="_blank">source</a>)</small>';
+        document.getElementById('downloadAllBtns').style.display = '';
+        updateCharts(epw, unitSystem);
+        setSearchStatus('Loaded: ' + label, 'ok');
+      })
+      .catch(function(err) {
+        console.warn('Direct/proxy ' + proxyIndex + ' failed for .epw:', err);
+        fetchEPWTextDirect(url, label, proxyIndex + 1);
+      });
+  }
 
-	if (parse[0]=="") {
-		//no file
-		return;
-	}
-
-	parse.forEach(function(d){
-		keyValue = d.split("=");
-		parseParams[keyValue[0].toLowerCase()] = decodeURIComponent(keyValue[1]);
-	})
-
-	var epwURL = parseParams.file;
-	console.log("attempting to download file from:" + parseParams.file);
-
-	var userOK = confirm("DO YOU WANT TO DOWNLOAD THE .EPW FILE FROM THIS URL?: " + epwURL + "  YOU MAY NEED TO DISABLE YOUR POP-UP BLOCKER FOR THIS SITE")
-	if (userOK == true){
-	  window.open(epwURL,'_blank');
-	};
-
-	//need to do a cross-domain request to download the file and read it upon successful load
-	//http://stackoverflow.com/questions/15005500/loading-cross-domain-html-page-with-ajax
-	//http://www.ajax-cross-origin.com/
-	//for now, simply open the url in a new window and the user can drag and drop
-	//readSingleFile(epwFilePath);
-  };
+  function parseURI() {
+    var params = {};
+    var search = window.location.search.replace('?', '');
+    if (!search) return;
+    search.split('&').forEach(function(part) {
+      var kv = part.split('=');
+      if (kv.length >= 2) {
+        params[kv[0].toLowerCase()] = decodeURIComponent(kv.slice(1).join('='));
+      }
+    });
+    var targetUrl = params['url'] || params['file'];
+    if (!targetUrl) return;
+    // Defer until DOM is ready so status element exists
+    document.addEventListener('DOMContentLoaded', function() {
+      loadEPWFromURL(targetUrl);
+    });
+  }
   parseURI();
 
   fileInput = document.getElementById('fileinput');
@@ -354,8 +1054,9 @@
     $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
-    epwTempFloodPlot(epw);
-    epwCloudFloodPlot(epw);
+    epwTimeseriesCharts(epw);
+    epwHeatmapCharts(epw);
+    epwTabularData(epw);
     epwWindRose(epw);
     epwPsychroChart(epw);
     epwValueFilter(epw);
@@ -375,55 +1076,96 @@
     updateCharts(epw,unitSystem);
   });
 
-  function downloadAllSVG() {
-    var charts = [
-      { id: 'epwTempFloodPlot',          name: 'drybulb-temperature' },
-      { id: 'epwCloudFloodPlot',         name: 'cloud-cover' },
-      { id: 'epwWindRose',               name: 'wind-rose' },
-      { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
-      { id: 'month-chart',               name: 'month' },
-      { id: 'hour-chart',                name: 'hour' },
-      { id: 'drybulb-temperature-chart', name: 'drybulb-temperature-filter' },
-      { id: 'dewpoint-temperature-chart',name: 'dewpoint-temperature-filter' },
-      { id: 'rh-chart',                  name: 'relative-humidity-filter' },
-      { id: 'wetbulb-temperature-chart', name: 'wetbulb-temperature-filter' },
-      { id: 'enthalpy-chart',            name: 'enthalpy-filter' }
+  // Returns [{svgEl, name}, ...] for every chart currently rendered on the page.
+  function collectAllCharts() {
+    var staticCharts = [
+      { id: 'epwTimeseriesAnnual',        name: 'timeseries-annual' },
+      { id: 'epwTimeseriesDailyProfile',  name: 'timeseries-daily-profile' },
+      { id: 'epwWindRose',                name: 'wind-rose' },
+      { id: 'epwPsychroChart',            name: 'psychrometric-chart' },
+      { id: 'month-chart',                name: 'month' },
+      { id: 'hour-chart',                 name: 'hour' },
+      { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter' },
+      { id: 'dewpoint-temperature-chart', name: 'dewpoint-temperature-filter' },
+      { id: 'rh-chart',                   name: 'relative-humidity-filter' },
+      { id: 'wetbulb-temperature-chart',  name: 'wetbulb-temperature-filter' },
+      { id: 'enthalpy-chart',             name: 'enthalpy-filter' },
+      { id: 'humidity-ratio-chart',       name: 'humidity-ratio-filter' },
+      { id: 'ghi-chart',                  name: 'ghi-filter' },
+      { id: 'dni-chart',                  name: 'dni-filter' },
+      { id: 'dhi-chart',                  name: 'dhi-filter' },
+      { id: 'wind-speed-chart',           name: 'wind-speed-filter' },
+      { id: 'sky-cover-chart',            name: 'sky-cover-filter' },
+      { id: 'pressure-chart',             name: 'pressure-filter' }
     ];
-    var any = false;
-    charts.forEach(function(c) {
-      var svgEl = document.querySelector('#' + c.id + ' svg');
-      if (svgEl) { any = true; downloadSVG(c.id, c.name); }
+    var result = [];
+    staticCharts.forEach(function(c) {
+      var el = document.querySelector('#' + c.id + ' svg');
+      if (el) result.push({ svgEl: el, name: c.name });
     });
-    if (!any) alert('No charts to export. Load an EPW file first.');
+    var hmContainer = document.getElementById('heatmapChartsContainer');
+    if (hmContainer) {
+      hmContainer.querySelectorAll('[id^="epwHeatmap-"]').forEach(function(div) {
+        var el = div.querySelector('svg');
+        if (el) result.push({ svgEl: el, name: div.id.replace('epwHeatmap-', '') + '-heatmap' });
+      });
+    }
+    return result;
+  }
+
+  function getZipBasename() {
+    var txt = (document.getElementById('stationName') || {}).textContent || '';
+    var base = txt.replace(/^Weather for\s*/i, '').trim().replace(/[^a-zA-Z0-9_\-]+/g, '_').replace(/^_+|_+$/g, '');
+    return base || 'epwvis-charts';
+  }
+
+  function triggerBlobDownload(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
+  }
+
+  function downloadAllSVG() {
+    var charts = collectAllCharts();
+    if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
+    var zip = new JSZip();
+    var serializer = new XMLSerializer();
+    charts.forEach(function(c) {
+      var source = serializer.serializeToString(c.svgEl);
+      if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      source = '<?xml version="1.0" standalone="no"?>\r\n' + source;
+      zip.file(c.name + '.svg', source);
+    });
+    zip.generateAsync({ type: 'blob' }).then(function(blob) {
+      triggerBlobDownload(blob, getZipBasename() + '-svg.zip');
+    });
   }
 
   function downloadAllPNG() {
-    var charts = [
-      { id: 'epwTempFloodPlot',          name: 'drybulb-temperature' },
-      { id: 'epwCloudFloodPlot',         name: 'cloud-cover' },
-      { id: 'epwWindRose',               name: 'wind-rose' },
-      { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
-      { id: 'month-chart',               name: 'month' },
-      { id: 'hour-chart',                name: 'hour' },
-      { id: 'drybulb-temperature-chart', name: 'drybulb-temperature-filter' },
-      { id: 'dewpoint-temperature-chart',name: 'dewpoint-temperature-filter' },
-      { id: 'rh-chart',                  name: 'relative-humidity-filter' },
-      { id: 'wetbulb-temperature-chart', name: 'wetbulb-temperature-filter' },
-      { id: 'enthalpy-chart',            name: 'enthalpy-filter' }
-    ];
-    var any = false;
-    var delay = 0;
-    charts.forEach(function(c) {
-      var svgEl = document.querySelector('#' + c.id + ' svg');
-      if (svgEl) {
-        any = true;
-        setTimeout(function(id, name) {
-          return function() { downloadPNG(id, name); };
-        }(c.id, c.name), delay);
-        delay += 300;
-      }
+    var charts = collectAllCharts();
+    if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
+    var promises = charts.map(function(c) {
+      return svgAsPngUri(c.svgEl, { scale: 2 }).then(function(uri) {
+        return { name: c.name, uri: uri };
+      });
     });
-    if (!any) alert('No charts to export. Load an EPW file first.');
+    Promise.all(promises).then(function(results) {
+      var zip = new JSZip();
+      results.forEach(function(r) {
+        var b64 = r.uri.replace(/^data:image\/png;base64,/, '');
+        zip.file(r.name + '.png', b64, { base64: true });
+      });
+      return zip.generateAsync({ type: 'blob' });
+    }).then(function(blob) {
+      triggerBlobDownload(blob, getZipBasename() + '-png.zip');
+    }).catch(function(err) {
+      alert('PNG export failed: ' + err.message);
+    });
   }
 
   function downloadSVG(containerId, filename) {
