@@ -173,7 +173,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav in" id="side-menu">
                 <li>
-                    <a href="#TemperatureFloodplot">Temperature Floodplot</a>
+                    <a href="#TemperatureHeatmap">Temperature Heatmap</a>
                 </li>
                 <li>
                     <a href="#Filter">Filter</a>
@@ -279,7 +279,7 @@
                             <!-- Tab navigation -->
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
                                 <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
-                                <li><a href="#tab-floodplots" data-toggle="tab">Floodplots</a></li>
+                                <li><a href="#tab-heatmaps" data-toggle="tab">Heatmaps</a></li>
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
                             </ul>
@@ -308,23 +308,23 @@
                                     <div id="epwTimeseriesDailyProfile"></div>
                                 </div><!-- /tab-timeseries -->
 
-                                <div class="tab-pane" id="tab-floodplots">
-                                    <div id="TemperatureFloodplot">
-                                        <h3>Drybulb Temperature Floodplot
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempFloodPlot','drybulb-temperature')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTempFloodPlot','drybulb-temperature')">&#8659; PNG</button>
+                                <div class="tab-pane" id="tab-heatmaps">
+                                    <div id="TemperatureHeatmap">
+                                        <h3>Drybulb Temperature
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempHeatmap','drybulb-temperature')">&#8659; SVG</button>
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTempHeatmap','drybulb-temperature')">&#8659; PNG</button>
                                         </h3>
-                                        <div id="epwTempFloodPlot"></div>
+                                        <div id="epwTempHeatmap"></div>
                                     </div>
 
-                                    <div id="CloudFloodplot">
-                                        <h3>Cloud Cover Floodplot
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwCloudFloodPlot','cloud-cover')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwCloudFloodPlot','cloud-cover')">&#8659; PNG</button>
+                                    <div id="CloudHeatmap">
+                                        <h3>Cloud Cover
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwCloudHeatmap','cloud-cover')">&#8659; SVG</button>
+                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwCloudHeatmap','cloud-cover')">&#8659; PNG</button>
                                         </h3>
-                                        <div id="epwCloudFloodPlot"></div>
+                                        <div id="epwCloudHeatmap"></div>
                                     </div>
-                                </div><!-- /tab-floodplots -->
+                                </div><!-- /tab-heatmaps -->
 
                                 <div class="tab-pane" id="tab-windrose">
                                     <div id="WindRose">
@@ -742,8 +742,8 @@
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
     epwTimeseriesCharts(epw);
-    epwTempFloodPlot(epw);
-    epwCloudFloodPlot(epw);
+    epwTempHeatmap(epw);
+    epwCloudHeatmap(epw);
     epwWindRose(epw);
     epwPsychroChart(epw);
     epwValueFilter(epw);
@@ -765,8 +765,8 @@
 
   function downloadAllSVG() {
     var charts = [
-      { id: 'epwTempFloodPlot',          name: 'drybulb-temperature' },
-      { id: 'epwCloudFloodPlot',         name: 'cloud-cover' },
+      { id: 'epwTempHeatmap',            name: 'drybulb-temperature' },
+      { id: 'epwCloudHeatmap',           name: 'cloud-cover' },
       { id: 'epwWindRose',               name: 'wind-rose' },
       { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
       { id: 'month-chart',               name: 'month' },
@@ -787,8 +787,8 @@
 
   function downloadAllPNG() {
     var charts = [
-      { id: 'epwTempFloodPlot',          name: 'drybulb-temperature' },
-      { id: 'epwCloudFloodPlot',         name: 'cloud-cover' },
+      { id: 'epwTempHeatmap',            name: 'drybulb-temperature' },
+      { id: 'epwCloudHeatmap',           name: 'cloud-cover' },
       { id: 'epwWindRose',               name: 'wind-rose' },
       { id: 'epwPsychroChart',           name: 'psychrometric-chart' },
       { id: 'month-chart',               name: 'month' },
