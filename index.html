@@ -203,7 +203,47 @@
     #tab-heatmaps {
       min-height: 480px;
     }
-
+    /* ---- Tabular Data tab ---- */
+    .tbl-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .tbl-var-label  { font-weight: normal; white-space: nowrap; margin: 0; }
+    .tbl-var-select { width: 260px; display: inline-block; }
+    .tbl-filter-info { font-size: smaller; color: #555; margin: 0 0 10px 0; }
+    #tblTableContainer table {
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 600px;
+    }
+    #tblTableContainer th,
+    #tblTableContainer td {
+      border: 1px solid #ddd;
+      padding: 5px 10px;
+      text-align: right;
+      white-space: nowrap;
+    }
+    #tblTableContainer th {
+      background: #f5f5f5;
+      font-weight: 600;
+      text-align: center;
+    }
+    #tblTableContainer td:first-child,
+    #tblTableContainer th:first-child {
+      text-align: left;
+    }
+    #tblTableContainer tr.tbl-year-row td {
+      font-weight: 600;
+      background: #f0f4ff;
+    }
+    #tblTableContainer tr:hover td {
+      background: #f9f9f9;
+    }
+    #tblTableContainer tr.tbl-year-row:hover td {
+      background: #e8eeff;
+    }
 </style>
 
 </head>
@@ -341,6 +381,7 @@
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
                                 <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
                                 <li><a href="#tab-heatmaps" data-toggle="tab">Heatmaps</a></li>
+                                <li><a href="#tab-tabular" data-toggle="tab">Tabular Data</a></li>
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
                             </ul>
@@ -386,6 +427,16 @@
                                     <p id="hmFilterInfo" class="hm-filter-info"></p>
                                     <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
+
+                                <div class="tab-pane" id="tab-tabular">
+                                    <div class="tbl-controls-row">
+                                        <label for="tblVariableSelect" class="tbl-var-label">Variable:</label>
+                                        <select id="tblVariableSelect" class="form-control tbl-var-select"></select>
+                                        <button id="tblDownloadCSV" class="btn btn-default btn-sm" style="margin-left:12px;">&#8659; CSV</button>
+                                    </div>
+                                    <p id="tblFilterInfo" class="tbl-filter-info"></p>
+                                    <div id="tblTableContainer"></div>
+                                </div><!-- /tab-tabular -->
 
                                 <div class="tab-pane" id="tab-windrose">
                                     <div id="WindRose">
@@ -804,6 +855,7 @@
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
     epwTimeseriesCharts(epw);
     epwHeatmapCharts(epw);
+    epwTabularData(epw);
     epwWindRose(epw);
     epwPsychroChart(epw);
     epwValueFilter(epw);
