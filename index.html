@@ -8,6 +8,67 @@
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
 <link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.1" type="text/css"/>
 
+<!-- Dynamic color overrides (updated by settings panel JS) -->
+<style id="epv-dyn-colors">
+  .foreground.bar { fill: steelblue; }
+  .brush rect.extent { fill: steelblue; fill-opacity: .125; }
+  .ts-swatch-blue { background: steelblue; }
+</style>
+
+<style>
+/* ---- Settings dropdown panel ---- */
+#settingsBtnWrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+#settingsPanel {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 9100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  padding: 12px 16px 14px;
+  min-width: 300px;
+  font-size: 13px;
+  color: #333;
+}
+#settingsPanel.open { display: block; }
+.settings-section-label {
+  font-weight: bold;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 7px 0;
+}
+.settings-separator { border-top: 1px solid #eee; margin: 11px 0; }
+.plot-color-swatches { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.plot-color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  transition: border-color .1s;
+}
+.plot-color-swatch:hover { border-color: #555; }
+.plot-color-swatch.selected { border-color: #111; box-shadow: 0 0 0 1px #111; }
+.hm-scheme-options { display: flex; flex-direction: column; gap: 5px; }
+.hm-scheme-row {
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; padding: 3px 5px; border-radius: 3px;
+}
+.hm-scheme-row:hover { background: #f4f4f4; }
+.hm-scheme-row.selected { background: #e8f0fe; }
+.hm-scheme-ramp { width: 90px; height: 13px; border-radius: 2px; flex-shrink: 0; }
+.hm-scheme-name { font-size: 12px; color: #333; }
+</style>
+
 <!-- load javascript libraries -->
 <script type="text/javascript" src="./lib/js/jQuery/jquery-2.2.4.min.js"></script>
 <script type="text/javascript" src="./lib/js/bootstrap/bootstrap.min.js"></script>
@@ -326,18 +387,22 @@
                         </ul>
 
                         <ul class="nav navbar-nav navbar-right">
-                          <li>
-                          Unit System:
-                          <div class="btn-group" data-toggle="buttons">
-                            <button type="button" class="btn btn-default navbar-btn active" id="buttonIP">IP</button>
-                            <button type="button" class="btn btn-default navbar-btn" id="buttonSI">SI</button>
-<!--                             <label type="button" class="btn btn-default navbar-btn active">
-                              <input type="radio" id="buttonIP">IP</input>
-                            </label>
-                            <label type="button" class="btn btn-default navbar-btn">
-                              <input type="radio" id="buttonSI">SI</input>
-                            </label> -->
-                          </div>
+                          <li style="display:flex; align-items:center; gap:10px; padding:0 6px;">
+                            <div id="settingsBtnWrap" style="position:relative;">
+                              <button id="settingsBtn" class="btn btn-default" style="font-size:15px;">Settings</button>
+                              <div id="settingsPanel">
+                                <div class="settings-section-label">Plot Color</div>
+                                <div class="plot-color-swatches" id="plotColorSwatches"></div>
+                                <div class="settings-separator"></div>
+                                <div class="settings-section-label">Heatmap Color Scheme</div>
+                                <div class="hm-scheme-options" id="hmSchemeOptions"></div>
+                              </div>
+                            </div>
+                            <span style="font-size:15px; color:#555; white-space:nowrap;">Unit System:</span>
+                            <div class="btn-group" data-toggle="buttons">
+                              <button type="button" class="btn btn-default active" id="buttonIP">IP</button>
+                              <button type="button" class="btn btn-default" id="buttonSI">SI</button>
+                            </div>
                           </li>
                         </ul>
                     </div>  <!-- second nav bar -->
@@ -510,6 +575,105 @@
    var epwURL = "";
   var epw = {};
   var unitSystem = "IP";
+
+  // ---- User appearance settings ----
+  window._plotColor = 'steelblue';
+  window._hmScheme  = 'rainbow';
+
+  var _settingsPlotColors = [
+    { value: 'steelblue', label: 'Steel Blue'   },
+    { value: '#e05b4b',   label: 'Coral'         },
+    { value: '#3a9a4a',   label: 'Forest Green'  },
+    { value: '#7b68c8',   label: 'Slate Purple'  },
+    { value: '#26a69a',   label: 'Teal'          },
+    { value: '#607d8b',   label: 'Slate Gray'    }
+  ];
+
+  var _settingsHmSchemes = [
+    { value: 'rainbow', label: 'Rainbow',    gradient: 'linear-gradient(to right, darkblue, blue, cyan, greenyellow, yellow, orange, red, darkred)' },
+    { value: 'rd-bu',   label: 'Red – Blue', gradient: 'linear-gradient(to right, #b2182b, #d6604d, #f4a582, #f7f7f7, #92c5de, #4393c3, #2166ac, #053061)' },
+    { value: 'viridis', label: 'Viridis',    gradient: 'linear-gradient(to right, #440154, #414487, #2a788e, #22a884, #7ad151, #fde725)' },
+    { value: 'inferno', label: 'Inferno',    gradient: 'linear-gradient(to right, #000004, #3f0f70, #8c2981, #dd513b, #fba40a, #fcffa4)' },
+    { value: 'blues',   label: 'Blues',      gradient: 'linear-gradient(to right, #f7fbff, #c6dbef, #6baed6, #2171b5, #08306b)' }
+  ];
+
+  function applyDynColors(color) {
+    window._plotColor = color;
+    var s = document.getElementById('epv-dyn-colors');
+    if (s) {
+      s.textContent = '.foreground.bar { fill: ' + color + '; }\n'
+        + '.brush rect.extent { fill: ' + color + '; fill-opacity: .125; }\n'
+        + '.ts-swatch-blue { background: ' + color + '; }';
+    }
+    // Update existing SVG elements in-place (no full redraw needed)
+    d3.selectAll('.foreground.bar').style('fill', color);
+    d3.selectAll('.polar-selection').style('fill', color).style('stroke', color);
+    d3.selectAll('path.pfg').style('fill', color);
+    // Update timeseries paths via redraw if data is loaded
+    if (epw && epw.stationLocation) { updateCharts(epw, unitSystem); }
+  }
+
+  function applyHmScheme(scheme) {
+    window._hmScheme = scheme;
+    if (epw && epw.stationLocation) { updateCharts(epw, unitSystem); }
+  }
+
+  function buildSettingsPanel() {
+    var swatchWrap = document.getElementById('plotColorSwatches');
+    var schemeWrap = document.getElementById('hmSchemeOptions');
+    if (!swatchWrap || !schemeWrap) return;
+
+    swatchWrap.innerHTML = '';
+    _settingsPlotColors.forEach(function(c) {
+      var el = document.createElement('span');
+      el.className = 'plot-color-swatch' + (c.value === window._plotColor ? ' selected' : '');
+      el.style.background = c.value;
+      el.title = c.label;
+      el.addEventListener('click', function() {
+        document.querySelectorAll('.plot-color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+        el.classList.add('selected');
+        applyDynColors(c.value);
+      });
+      swatchWrap.appendChild(el);
+    });
+
+    schemeWrap.innerHTML = '';
+    _settingsHmSchemes.forEach(function(s) {
+      var row = document.createElement('div');
+      row.className = 'hm-scheme-row' + (s.value === window._hmScheme ? ' selected' : '');
+      var ramp = document.createElement('div');
+      ramp.className = 'hm-scheme-ramp';
+      ramp.style.background = s.gradient;
+      var lbl = document.createElement('span');
+      lbl.className = 'hm-scheme-name';
+      lbl.textContent = s.label;
+      row.appendChild(ramp);
+      row.appendChild(lbl);
+      row.addEventListener('click', function() {
+        document.querySelectorAll('.hm-scheme-row').forEach(function(r) { r.classList.remove('selected'); });
+        row.classList.add('selected');
+        window._hmScheme = s.value;
+        applyHmScheme(s.value);
+      });
+      schemeWrap.appendChild(row);
+    });
+  }
+
+  // Toggle settings panel open/close
+  document.addEventListener('click', function(e) {
+    var panel = document.getElementById('settingsPanel');
+    var btn   = document.getElementById('settingsBtn');
+    if (!panel || !btn) return;
+    if (btn.contains(e.target)) {
+      var isOpen = panel.classList.contains('open');
+      if (!isOpen) { buildSettingsPanel(); }
+      panel.classList.toggle('open');
+      return;
+    }
+    if (!panel.contains(e.target)) {
+      panel.classList.remove('open');
+    }
+  });
 
   // ---- Location search: station data and helpers ----
   var epwStations = [];        // loaded from stations.json
