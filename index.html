@@ -200,6 +200,10 @@
       margin: 0 0 8px 0;
       color: #555;
     }
+    .vf-var-dropdown-wrap {
+      margin: 6px 0 4px 0;
+    }
+
     #tab-heatmaps {
       min-height: 480px;
     }
@@ -345,6 +349,12 @@
                         <div id="epwSidebar">
                             <h3 style="margin-top:8px; margin-bottom:4px;">Value Filter
                                 <button onclick="resetAll()" class="btn btn-default btn-xs" style="vertical-align:middle;">Reset Filters</button>
+                                <span style="display:inline-block; vertical-align:middle;">
+                                  <div class="hm-checkbox-dropdown" id="vfDropdown">
+                                    <button type="button" class="btn btn-default btn-xs hm-dropdown-toggle" id="vfDropdownToggle">Select filters <span class="caret"></span></button>
+                                    <div class="hm-dropdown-menu" id="vfDropdownMenu"></div>
+                                  </div>
+                                </span>
                                 <button onclick="downloadAllSVG()" class="btn btn-default btn-xs" style="vertical-align:middle;">&#8659; All SVG</button>
                                 <button onclick="downloadAllPNG()" class="btn btn-default btn-xs" style="vertical-align:middle;">&#8659; All PNG</button>
                             </h3>
@@ -358,6 +368,7 @@
                               <div id="hour-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Hour</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('hour-chart','hour')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('hour-chart','hour')">&#8659; PNG</button></div></div>
                               </div>
+
                               <div id="drybulb-temperature-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Drybulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
@@ -372,6 +383,27 @@
                               </div>
                               <div id="enthalpy-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Enthalpy</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('enthalpy-chart','enthalpy-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('enthalpy-chart','enthalpy-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="humidity-ratio-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Humidity Ratio</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="ghi-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Global Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('ghi-chart','ghi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ghi-chart','ghi-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="dni-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Direct Normal Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dni-chart','dni-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dni-chart','dni-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="dhi-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Diffuse Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dhi-chart','dhi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dhi-chart','dhi-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="wind-speed-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="sky-cover-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="pressure-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
                               </div>
                             </div>
                         </div>
@@ -888,7 +920,14 @@
       { id: 'dewpoint-temperature-chart', name: 'dewpoint-temperature-filter' },
       { id: 'rh-chart',                   name: 'relative-humidity-filter' },
       { id: 'wetbulb-temperature-chart',  name: 'wetbulb-temperature-filter' },
-      { id: 'enthalpy-chart',             name: 'enthalpy-filter' }
+      { id: 'enthalpy-chart',             name: 'enthalpy-filter' },
+      { id: 'humidity-ratio-chart',       name: 'humidity-ratio-filter' },
+      { id: 'ghi-chart',                  name: 'ghi-filter' },
+      { id: 'dni-chart',                  name: 'dni-filter' },
+      { id: 'dhi-chart',                  name: 'dhi-filter' },
+      { id: 'wind-speed-chart',           name: 'wind-speed-filter' },
+      { id: 'sky-cover-chart',            name: 'sky-cover-filter' },
+      { id: 'pressure-chart',             name: 'pressure-filter' }
     ];
     var result = [];
     staticCharts.forEach(function(c) {
