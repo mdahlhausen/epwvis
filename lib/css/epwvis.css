@@ -134,3 +134,64 @@
 .legend-header text {
   font: 14px sans-serif;
 }
+
+/* ---- Timeseries tab ---- */
+.ts-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.ts-var-label {
+  font-weight: normal;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.ts-var-select {
+  display: inline-block;
+  width: 280px;
+  height: 30px;
+  padding: 2px 8px;
+  font-size: 13px;
+}
+
+.ts-section-header {
+  font-size: 14px;
+  font-weight: normal;
+  margin: 4px 0 6px 0;
+  color: #444;
+}
+
+.ts-legend-hint {
+  font-size: 11px;
+  color: #888;
+  font-weight: normal;
+  margin-left: 10px;
+}
+
+.ts-swatch {
+  display: inline-block;
+  width: 20px;
+  height: 8px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 3px;
+}
+
+.ts-swatch-grey { background: #ddd; }
+.ts-swatch-blue { background: steelblue; opacity: 0.6; }
+
+/* Horizontal scrolling wrapper for the annual timeseries */
+#epwTimeseriesAnnualWrap {
+  overflow-x: auto;
+  width: 100%;
+  margin-bottom: 22px;
+  padding-bottom: 4px;
+}
+
+#epwTimeseriesAnnual svg,
+#epwTimeseriesDailyProfile svg {
+  display: block;
+}

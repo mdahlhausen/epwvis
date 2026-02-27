@@ -278,7 +278,8 @@
                         <div id="epwMain">
                             <!-- Tab navigation -->
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
-                                <li class="active"><a href="#tab-floodplots" data-toggle="tab">Floodplots</a></li>
+                                <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
+                                <li><a href="#tab-floodplots" data-toggle="tab">Floodplots</a></li>
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
                             </ul>
@@ -286,7 +287,28 @@
                             <!-- Tab content -->
                             <div class="tab-content">
 
-                                <div class="tab-pane active" id="tab-floodplots">
+                                <div class="tab-pane active" id="tab-timeseries">
+                                    <div class="ts-controls-row">
+                                        <label for="tsVariableSelect" class="ts-var-label">Variable:</label>
+                                        <select id="tsVariableSelect" class="form-control ts-var-select"></select>
+                                    </div>
+                                    <h4 class="ts-section-header">Annual Timeseries
+                                        <span class="ts-legend-hint">
+                                            <span class="ts-swatch ts-swatch-grey"></span>All data (min–max range + daily avg)
+                                            &nbsp;
+                                            <span class="ts-swatch ts-swatch-blue"></span>Filtered data (min–max range + daily avg)
+                                        </span>
+                                    </h4>
+                                    <div id="epwTimeseriesAnnualWrap">
+                                        <div id="epwTimeseriesAnnual"></div>
+                                    </div>
+                                    <h4 class="ts-section-header">Average Daily Profile by Month
+                                        <span class="ts-legend-hint">One panel per month &nbsp;|&nbsp; Grey band = all-data min–max &nbsp;|&nbsp; Color band + line = filtered avg &amp; min–max</span>
+                                    </h4>
+                                    <div id="epwTimeseriesDailyProfile"></div>
+                                </div><!-- /tab-timeseries -->
+
+                                <div class="tab-pane" id="tab-floodplots">
                                     <div id="TemperatureFloodplot">
                                         <h3>Drybulb Temperature Floodplot
                                           <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTempFloodPlot','drybulb-temperature')">&#8659; SVG</button>
@@ -719,6 +741,7 @@
     $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
+    epwTimeseriesCharts(epw);
     epwTempFloodPlot(epw);
     epwCloudFloodPlot(epw);
     epwWindRose(epw);
