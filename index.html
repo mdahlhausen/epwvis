@@ -342,21 +342,23 @@
                         </ul>
                     </div>  <!-- second nav bar -->
 
-                    <h3 id="stationName"></h3>
+                    <h3 id="stationName" style="display:inline-block; margin-right:8px;"></h3>
+                    <span id="downloadAllBtns" style="display:none;">
+                    <button onclick="downloadAllSVG()" class="btn btn-default btn-sm" style="vertical-align:middle;">Download All SVG</button>
+                    <button onclick="downloadAllPNG()" class="btn btn-default btn-sm" style="vertical-align:middle;">Download All PNG</button>
+                    </span>
 
                     <div id="epwChartDiv">
 
                         <div id="epwSidebar">
                             <h3 style="margin-top:8px; margin-bottom:4px;">Value Filter
-                                <button onclick="resetAll()" class="btn btn-default btn-xs" style="vertical-align:middle;">Reset Filters</button>
+                                <button onclick="resetAll()" class="btn btn-default btn-sm" style="vertical-align:middle;">Reset Filters</button>
                                 <span style="display:inline-block; vertical-align:middle;">
                                   <div class="hm-checkbox-dropdown" id="vfDropdown">
-                                    <button type="button" class="btn btn-default btn-xs hm-dropdown-toggle" id="vfDropdownToggle">Select filters <span class="caret"></span></button>
+                                    <button type="button" class="btn btn-default btn-sm hm-dropdown-toggle" id="vfDropdownToggle">Select Value Filters <span class="caret"></span></button>
                                     <div class="hm-dropdown-menu" id="vfDropdownMenu"></div>
                                   </div>
                                 </span>
-                                <button onclick="downloadAllSVG()" class="btn btn-default btn-xs" style="vertical-align:middle;">&#8659; All SVG</button>
-                                <button onclick="downloadAllPNG()" class="btn btn-default btn-xs" style="vertical-align:middle;">&#8659; All PNG</button>
                             </h3>
                             <p style="font-size:smaller; margin-bottom:4px;"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</p>
                             <p id="tempFilterExamples"></p>
@@ -691,6 +693,7 @@
           'Weather for ' + epw.stationLocation +
           ' <small style="font-size:12px;color:#888;">(TMYx 2009-2023, via <a href="' +
           stationUrl(station) + '" target="_blank">OneBuilding</a>)</small>';
+        document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem);
         setSearchStatus('Loaded: ' + station.n, 'ok');
       })
@@ -774,6 +777,7 @@
 
 		//console.log(epw);
 		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
+        document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem)
       };
 	  r.readAsText(f);
@@ -827,6 +831,7 @@
           'Weather for ' + epw.stationLocation +
           ' <small style="font-size:12px;color:#888;">(<a href="' +
           url + '" target="_blank">source</a>)</small>';
+        document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem);
         setSearchStatus('Loaded: ' + label, 'ok');
       })
