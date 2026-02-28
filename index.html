@@ -1317,7 +1317,27 @@
   function downloadPNG(containerId, filename) {
     var svgEl = document.querySelector('#' + containerId + ' svg');
     if (!svgEl) { alert("No chart to export. Load an EPW file first."); return; }
+
+    // saveSvgAsPng serializes SVG without external CSS, so inject the critical
+    // style rules inline so axes render correctly (without CSS, path fill defaults
+    // to black, making axis lines appear thick).
+    var _color = window._plotColor || 'steelblue';
+    var styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    styleEl.textContent =
+      '.axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges; }' +
+      '.axis text { font: 13px sans-serif; }' +
+      '.background.bar { fill: #ccc; }' +
+      '.foreground.bar { fill: ' + _color + '; }' +
+      '.brush rect.extent { fill: ' + _color + '; fill-opacity: .125; }' +
+      '.legend text { font: 12px sans-serif; }' +
+      '.legend-header text { font: 14px sans-serif; }' +
+      '.polar-g .pbg, .polar-g .pfg { stroke: white; stroke-width: 0.5px; }';
+    svgEl.insertBefore(styleEl, svgEl.firstChild);
+
     saveSvgAsPng(svgEl, filename + ".png", { scale: 2 });
+
+    // Remove injected style after SVG has been serialized for export
+    setTimeout(function() { if (svgEl.contains(styleEl)) svgEl.removeChild(styleEl); }, 1000);
   }
 </script>
 
