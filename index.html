@@ -667,6 +667,7 @@
                                         <span id="ddCoolUnit" class="dd-base-label">&deg;F</span>
                                         <button class="btn btn-default btn-xs" style="margin-left:14px; vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
                                         <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysChart','degree-days')">&#8659; PNG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadDDCSV()">&#8659; CSV</button>
                                     </div>
                                     <div id="ddTotals" class="dd-totals"></div>
                                     <div class="dd-legend">
@@ -1312,6 +1313,58 @@
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  }
+
+  function downloadDDCSV() {
+    var allData = window._tsAllData;
+    if (!allData || !allData.length) { alert('No data to export. Load an EPW file first.'); return; }
+    var activeData = window._ddLastActive || allData;
+    var isIP = (unitSystem === 'IP');
+    var defaultBase = isIP ? 65 : 18;
+    var hBase = window._ddHeatBase || defaultBase;
+    var cBase = window._ddCoolBase || defaultBase;
+    var uLabel = isIP ? 'F' : 'C';
+    var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function calcDD(data) {
+      var months = d3.range(0, 12).map(function() { return { hdd: 0, cdd: 0 }; });
+      data.forEach(function(d) {
+        months[d.month - 1].hdd += Math.max(0, hBase - d.dryBulbTemperature) / 24;
+        months[d.month - 1].cdd += Math.max(0, d.dryBulbTemperature - cBase) / 24;
+      });
+      return months;
+    }
+
+    var allDD    = calcDD(allData);
+    var activeDD = calcDD(activeData);
+
+    var rows = [
+      'Month,' +
+      'HDD Filtered (base ' + hBase + '°' + uLabel + '),' +
+      'CDD Filtered (base ' + cBase + '°' + uLabel + '),' +
+      'HDD All Data (base ' + hBase + '°' + uLabel + '),' +
+      'CDD All Data (base ' + cBase + '°' + uLabel + ')'
+    ];
+    monthNames.forEach(function(m, i) {
+      rows.push([
+        m,
+        activeDD[i].hdd.toFixed(2),
+        activeDD[i].cdd.toFixed(2),
+        allDD[i].hdd.toFixed(2),
+        allDD[i].cdd.toFixed(2)
+      ].join(','));
+    });
+    // Annual totals row
+    rows.push([
+      'Annual',
+      d3.sum(activeDD, function(d) { return d.hdd; }).toFixed(2),
+      d3.sum(activeDD, function(d) { return d.cdd; }).toFixed(2),
+      d3.sum(allDD,    function(d) { return d.hdd; }).toFixed(2),
+      d3.sum(allDD,    function(d) { return d.cdd; }).toFixed(2)
+    ].join(','));
+
+    var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, 'degree-days.csv');
   }
 
   function downloadPNG(containerId, filename) {
