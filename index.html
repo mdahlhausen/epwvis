@@ -309,6 +309,29 @@
     #tblTableContainer tr.tbl-year-row:hover td {
       background: #e8eeff;
     }
+    /* ---- Scatter Plot tab ---- */
+    .scatter-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .scatter-axis-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scatter-axis-label {
+      font-weight: normal;
+      white-space: nowrap;
+      margin: 0;
+      color: #444;
+    }
+    .scatter-var-select {
+      width: 240px;
+      display: inline-block;
+    }
 </style>
 
 </head>
@@ -480,6 +503,7 @@
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
                                 <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
                                 <li><a href="#tab-heatmaps" data-toggle="tab">Heatmaps</a></li>
+                                <li><a href="#tab-scatter" data-toggle="tab">Scatter Plot</a></li>
                                 <li><a href="#tab-tabular" data-toggle="tab">Tabular Data</a></li>
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
@@ -526,6 +550,22 @@
                                     <p id="hmFilterInfo" class="hm-filter-info"></p>
                                     <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
+
+                                <div class="tab-pane" id="tab-scatter">
+                                    <div class="scatter-controls-row">
+                                        <div class="scatter-axis-group">
+                                            <label for="scatterXSelect" class="scatter-axis-label">X axis:</label>
+                                            <select id="scatterXSelect" class="form-control scatter-var-select"></select>
+                                        </div>
+                                        <div class="scatter-axis-group">
+                                            <label for="scatterYSelect" class="scatter-axis-label">Y axis:</label>
+                                            <select id="scatterYSelect" class="form-control scatter-var-select"></select>
+                                        </div>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwScatterChart','scatter-chart')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwScatterChart','scatter-chart')">&#8659; PNG</button>
+                                    </div>
+                                    <div id="epwScatterChart"></div>
+                                </div><!-- /tab-scatter -->
 
                                 <div class="tab-pane" id="tab-tabular">
                                     <div class="tbl-controls-row">
@@ -1059,6 +1099,7 @@
     epwTabularData(epw);
     epwWindRose(epw);
     epwPsychroChart(epw);
+    epwScatterChart(epw);
     epwValueFilter(epw);
   };
 
@@ -1083,6 +1124,7 @@
       { id: 'epwTimeseriesDailyProfile',  name: 'timeseries-daily-profile' },
       { id: 'epwWindRose',                name: 'wind-rose' },
       { id: 'epwPsychroChart',            name: 'psychrometric-chart' },
+      { id: 'epwScatterChart',             name: 'scatter-chart' },
       { id: 'month-chart',                name: 'month' },
       { id: 'hour-chart',                 name: 'hour' },
       { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter' },
@@ -1192,6 +1234,9 @@
     saveSvgAsPng(svgEl, filename + ".png", { scale: 2 });
   }
 </script>
+
+<!-- Tooltip for scatter chart -->
+<div id="epw-scatter-tooltip" class="epw-tooltip"></div>
 
 <!-- Tooltip for heatmap charts -->
 <div id="epw-heatmap-tooltip" class="epw-tooltip"></div>
