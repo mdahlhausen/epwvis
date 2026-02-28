@@ -6,7 +6,7 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.2" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.3" type="text/css"/>
 
 <!-- Dynamic color overrides (updated by settings panel JS) -->
 <style id="epv-dyn-colors">
@@ -76,7 +76,7 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.1"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.3"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.4"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
 <script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
 <script type="text/javascript" src="./data/stations.js"></script>
@@ -309,6 +309,74 @@
     #tblTableContainer tr.tbl-year-row:hover td {
       background: #e8eeff;
     }
+    /* ---- Duration Curve tab ---- */
+    .dur-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .dur-var-label  { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
+    .dur-var-select { width: 260px; display: inline-block; }
+    .dur-chart-outer { position: relative; display: inline-block; }
+    .dur-reflines-panel {
+      position: absolute;
+      top: 38px;
+      left: 93%;
+      background: rgba(255,255,255,0.94);
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 6px 10px 8px;
+      font-size: 12px;
+      z-index: 10;
+      min-width: 82px;
+      line-height: 1.8;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    }
+    .dur-ref-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 3px; }
+    #chartTabs > li > a { padding: 8px 8px; }
+    /* ---- Degree Days tab ---- */
+    .dd-controls-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .dd-base-label { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
+    .dd-base-input { width: 72px !important; display: inline-block; }
+    .dd-totals { font-size: 13px; margin-bottom: 6px; color: #333; font-weight: normal; }
+    .dd-totals .dd-hdd { color: #c0392b; font-weight: bold; }
+    .dd-totals .dd-cdd { color: #1a6faf; font-weight: bold; }
+    .dd-legend { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; font-size: 12px; color: #444; }
+    .dd-swatch { display: inline-block; width: 13px; height: 13px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+    .dur-refline-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 0;
+      font-weight: normal;
+    }
+    .dur-refline-item input { margin: 0; cursor: pointer; }
+    .scatter-controls-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .scatter-axis-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .scatter-axis-label {
+      font-weight: normal;
+      white-space: nowrap;
+      margin: 0;
+      color: #444;
+    }
+    .scatter-var-select {
+      width: 240px;
+      display: inline-block;
+    }
 </style>
 
 </head>
@@ -480,9 +548,12 @@
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
                                 <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
                                 <li><a href="#tab-heatmaps" data-toggle="tab">Heatmaps</a></li>
+                                <li><a href="#tab-duration" data-toggle="tab">Duration Curve</a></li>
+                                <li><a href="#tab-scatter" data-toggle="tab">Scatter Plot</a></li>
                                 <li><a href="#tab-tabular" data-toggle="tab">Tabular Data</a></li>
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
+                                <li><a href="#tab-degreedays" data-toggle="tab">Degree Days</a></li>
                             </ul>
 
                             <!-- Tab content -->
@@ -527,6 +598,35 @@
                                     <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
 
+                                <div class="tab-pane" id="tab-duration">
+                                    <div class="dur-controls-row">
+                                        <label for="durVariableSelect" class="dur-var-label">Variable:</label>
+                                        <select id="durVariableSelect" class="form-control dur-var-select"></select>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwDurationChart','duration-curve')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwDurationChart','duration-curve')">&#8659; PNG</button>
+                                    </div>
+                                    <div class="dur-chart-outer">
+                                        <div id="epwDurationChart"></div>
+                                        <div id="durRefLinesPanel" class="dur-reflines-panel"></div>
+                                    </div>
+                                </div><!-- /tab-duration -->
+
+                                <div class="tab-pane" id="tab-scatter">
+                                    <div class="scatter-controls-row">
+                                        <div class="scatter-axis-group">
+                                            <label for="scatterXSelect" class="scatter-axis-label">X axis:</label>
+                                            <select id="scatterXSelect" class="form-control scatter-var-select"></select>
+                                        </div>
+                                        <div class="scatter-axis-group">
+                                            <label for="scatterYSelect" class="scatter-axis-label">Y axis:</label>
+                                            <select id="scatterYSelect" class="form-control scatter-var-select"></select>
+                                        </div>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwScatterChart','scatter-chart')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwScatterChart','scatter-chart')">&#8659; PNG</button>
+                                    </div>
+                                    <div id="epwScatterChart"></div>
+                                </div><!-- /tab-scatter -->
+
                                 <div class="tab-pane" id="tab-tabular">
                                     <div class="tbl-controls-row">
                                         <label for="tblVariableSelect" class="tbl-var-label">Variable:</label>
@@ -557,6 +657,28 @@
                                     </div>
                                 </div><!-- /tab-psychro -->
 
+                                <div class="tab-pane" id="tab-degreedays">
+                                    <div class="dd-controls-row">
+                                        <label class="dd-base-label">Heating base:</label>
+                                        <input id="ddHeatBase" type="number" class="form-control dd-base-input" value="65" step="1">
+                                        <span id="ddHeatUnit" class="dd-base-label">&deg;F</span>
+                                        <label class="dd-base-label" style="margin-left:14px;">Cooling base:</label>
+                                        <input id="ddCoolBase" type="number" class="form-control dd-base-input" value="65" step="1">
+                                        <span id="ddCoolUnit" class="dd-base-label">&deg;F</span>
+                                        <button class="btn btn-default btn-xs" style="margin-left:14px; vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysChart','degree-days')">&#8659; PNG</button>
+                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadDDCSV()">&#8659; CSV</button>
+                                    </div>
+                                    <div id="ddTotals" class="dd-totals"></div>
+                                    <div class="dd-legend">
+                                        <span><span class="dd-swatch" style="background:#c0392b;"></span>Heating DD (filtered)</span>
+                                        <span><span class="dd-swatch" style="background:#e8a9a0;"></span>Heating DD (all data)</span>
+                                        <span><span class="dd-swatch" style="background:#1a6faf;"></span>Cooling DD (filtered)</span>
+                                        <span><span class="dd-swatch" style="background:#a0c4e8;"></span>Cooling DD (all data)</span>
+                                    </div>
+                                    <div id="epwDegreeDaysChart"></div>
+                                </div><!-- /tab-degreedays -->
+
                             </div><!-- /tab-content -->
                         </div>
 
@@ -581,12 +703,13 @@
   window._hmScheme  = 'rainbow';
 
   var _settingsPlotColors = [
-    { value: 'steelblue', label: 'Steel Blue'   },
+    { value: 'steelblue', label: 'Steel Blue'    },
+    { value: '#607d8b',   label: 'Slate Gray'    },
+    { value: '#1a1a1a',   label: 'Black'         },
     { value: '#e05b4b',   label: 'Coral'         },
     { value: '#3a9a4a',   label: 'Forest Green'  },
     { value: '#7b68c8',   label: 'Slate Purple'  },
-    { value: '#26a69a',   label: 'Teal'          },
-    { value: '#607d8b',   label: 'Slate Gray'    }
+    { value: '#26a69a',   label: 'Teal'          }
   ];
 
   var _settingsHmSchemes = [
@@ -1059,6 +1182,9 @@
     epwTabularData(epw);
     epwWindRose(epw);
     epwPsychroChart(epw);
+    epwScatterChart(epw);
+    epwDurationCurve(epw);
+    epwDegreeDays(epw);
     epwValueFilter(epw);
   };
 
@@ -1083,6 +1209,9 @@
       { id: 'epwTimeseriesDailyProfile',  name: 'timeseries-daily-profile' },
       { id: 'epwWindRose',                name: 'wind-rose' },
       { id: 'epwPsychroChart',            name: 'psychrometric-chart' },
+      { id: 'epwScatterChart',             name: 'scatter-chart' },
+      { id: 'epwDurationChart',            name: 'duration-curve' },
+      { id: 'epwDegreeDaysChart',           name: 'degree-days' },
       { id: 'month-chart',                name: 'month' },
       { id: 'hour-chart',                 name: 'hour' },
       { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter' },
@@ -1186,12 +1315,96 @@
     document.body.removeChild(link);
   }
 
+  function downloadDDCSV() {
+    var allData = window._tsAllData;
+    if (!allData || !allData.length) { alert('No data to export. Load an EPW file first.'); return; }
+    var activeData = window._ddLastActive || allData;
+    var isIP = (unitSystem === 'IP');
+    var defaultBase = isIP ? 65 : 18;
+    var hBase = window._ddHeatBase || defaultBase;
+    var cBase = window._ddCoolBase || defaultBase;
+    var uLabel = isIP ? 'F' : 'C';
+    var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+    function calcDD(data) {
+      var months = d3.range(0, 12).map(function() { return { hdd: 0, cdd: 0 }; });
+      data.forEach(function(d) {
+        months[d.month - 1].hdd += Math.max(0, hBase - d.dryBulbTemperature) / 24;
+        months[d.month - 1].cdd += Math.max(0, d.dryBulbTemperature - cBase) / 24;
+      });
+      return months;
+    }
+
+    var allDD    = calcDD(allData);
+    var activeDD = calcDD(activeData);
+
+    var rows = [
+      'Month,' +
+      'HDD Filtered (base ' + hBase + '°' + uLabel + '),' +
+      'CDD Filtered (base ' + cBase + '°' + uLabel + '),' +
+      'HDD All Data (base ' + hBase + '°' + uLabel + '),' +
+      'CDD All Data (base ' + cBase + '°' + uLabel + ')'
+    ];
+    monthNames.forEach(function(m, i) {
+      rows.push([
+        m,
+        activeDD[i].hdd.toFixed(2),
+        activeDD[i].cdd.toFixed(2),
+        allDD[i].hdd.toFixed(2),
+        allDD[i].cdd.toFixed(2)
+      ].join(','));
+    });
+    // Annual totals row
+    rows.push([
+      'Annual',
+      d3.sum(activeDD, function(d) { return d.hdd; }).toFixed(2),
+      d3.sum(activeDD, function(d) { return d.cdd; }).toFixed(2),
+      d3.sum(allDD,    function(d) { return d.hdd; }).toFixed(2),
+      d3.sum(allDD,    function(d) { return d.cdd; }).toFixed(2)
+    ].join(','));
+
+    var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, 'degree-days.csv');
+  }
+
   function downloadPNG(containerId, filename) {
     var svgEl = document.querySelector('#' + containerId + ' svg');
     if (!svgEl) { alert("No chart to export. Load an EPW file first."); return; }
+
+    // saveSvgAsPng serializes SVG without external CSS, so inject the critical
+    // style rules inline so axes render correctly (without CSS, path fill defaults
+    // to black, making axis lines appear thick).
+    var _color = window._plotColor || 'steelblue';
+    var styleEl = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    styleEl.textContent =
+      '.axis path, .axis line { fill: none; stroke: #000; shape-rendering: crispEdges; }' +
+      '.axis text { font: 13px sans-serif; }' +
+      '.background.bar { fill: #ccc; }' +
+      '.foreground.bar { fill: ' + _color + '; }' +
+      '.brush rect.extent { fill: ' + _color + '; fill-opacity: .125; }' +
+      '.legend text { font: 12px sans-serif; }' +
+      '.legend-header text { font: 14px sans-serif; }' +
+      '.polar-g .pbg, .polar-g .pfg { stroke: white; stroke-width: 0.5px; }';
+    svgEl.insertBefore(styleEl, svgEl.firstChild);
+
     saveSvgAsPng(svgEl, filename + ".png", { scale: 2 });
+
+    // Remove injected style after SVG has been serialized for export
+    setTimeout(function() { if (svgEl.contains(styleEl)) svgEl.removeChild(styleEl); }, 1000);
   }
 </script>
+
+<!-- Tooltip for scatter chart -->
+<div id="epw-scatter-tooltip" class="epw-tooltip"></div>
+<!-- Tooltip for duration curve -->
+<div id="epw-dur-tooltip" class="epw-tooltip"></div>
+<!-- Tooltip for degree days -->
+<div id="epw-dd-tooltip" class="epw-tooltip"></div>
+
+<!-- Tooltip for heatmap charts -->
+<div id="epw-heatmap-tooltip" class="epw-tooltip"></div>
+<!-- Tooltip for psychrometric chart -->
+<div id="epw-psychro-tooltip" class="epw-tooltip"></div>
 
 <script>
   //google analytics

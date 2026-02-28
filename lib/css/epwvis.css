@@ -49,7 +49,7 @@
 }
 
 .axis text {
-  font: 10px sans-serif;
+  font: 13px sans-serif;
 }
 
 .brush rect.extent {
@@ -182,6 +182,21 @@
 
 .ts-swatch-grey { background: #ddd; }
 .ts-swatch-blue { background: steelblue; opacity: 0.6; }
+
+/* ---- Shared tooltip ---- */
+.epw-tooltip {
+    position: fixed;
+    background: rgba(0,0,0,0.78);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 9999;
+    display: none;
+}
 
 /* Horizontal scrolling wrapper for the annual timeseries */
 #epwTimeseriesAnnualWrap {
