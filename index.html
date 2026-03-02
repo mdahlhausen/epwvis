@@ -67,6 +67,23 @@
 .hm-scheme-row.selected { background: #e8f0fe; }
 .hm-scheme-ramp { width: 90px; height: 13px; border-radius: 2px; flex-shrink: 0; }
 .hm-scheme-name { font-size: 12px; color: #333; }
+
+/* ---- Per-chart reset button ---- */
+.xfilter-reset-btn {
+  color: #a00;
+  border-color: #daa;
+  padding: 1px 5px;
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0.5;
+  transition: opacity .15s;
+}
+.xfilter-reset-btn:hover {
+  opacity: 1;
+  background: #fff0f0;
+  border-color: #c55;
+  color: #c00;
+}
 </style>
 
 <!-- load javascript libraries -->
@@ -76,7 +93,8 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.1"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.4"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.1.2"></script>
+<script type="text/javascript" src="./lib/js/solarPV.js?v=1.0.1"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
 <script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
 <script type="text/javascript" src="./data/stations.js"></script>
@@ -338,6 +356,24 @@
     #chartTabs > li > a { padding: 8px 8px; }
     /* ---- Degree Days tab ---- */
     .dd-controls-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+
+    /* ---- Solar PV tab ---- */
+    .pv-controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .pv-label  { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
+    .pv-input-sm { width: 72px !important; display: inline-block; }
+    .pv-select-sm { width: 170px; display: inline-block; }
+    .pv-annual-total { font-size: 14px; margin-bottom: 6px; color: #333; font-weight: normal; }
+    .pv-metric-explain { font-size: 12px; color: #666; margin-bottom: 12px; line-height: 1.55; }
+    .pv-section-title { font-size: 13px; font-weight: bold; color: #333; margin: 14px 0 4px 0; }
+    .pv-attribution { margin-top: 24px; padding: 12px 16px; background: #f7f7f7; border-left: 3px solid #bbb;
+                       border-radius: 3px; font-size: 11.5px; color: #555; line-height: 1.7; }
+    .pv-attribution h5 { margin: 0 0 6px 0; font-size: 12px; font-weight: bold; color: #444; text-transform: uppercase;
+                         letter-spacing: 0.04em; }
+    .pv-attribution ul { margin: 0; padding-left: 18px; }
+    .pv-attribution li { margin-bottom: 3px; }
+    .pv-chart-wrap { display: inline-block; }
+    .pv-chart-overlay-btns { text-align: right; margin-bottom: 4px; width: 100%; }
+    .pv-chart-overlay-btns .btn { margin-left: 3px; }
     .dd-base-label { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
     .dd-base-input { width: 72px !important; display: inline-block; }
     .dd-totals { font-size: 13px; margin-bottom: 6px; color: #333; font-weight: normal; }
@@ -498,47 +534,49 @@
 
                             <div id="xfilterCharts">
                               <div id="month-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Month</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('month-chart','month')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('month-chart','month')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Month</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(0)" title="Reset month filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('month-chart','month')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('month-chart','month')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="hour-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Hour</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('hour-chart','hour')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('hour-chart','hour')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Hour</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(1)" title="Reset hour filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('hour-chart','hour')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('hour-chart','hour')">&#8659; PNG</button></div></div>
                               </div>
-
                               <div id="drybulb-temperature-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Drybulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Drybulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(2)" title="Reset drybulb temperature filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="dewpoint-temperature-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Dewpoint Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Dewpoint Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(3)" title="Reset dewpoint temperature filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="rh-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Relative Humidity</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('rh-chart','relative-humidity-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('rh-chart','relative-humidity-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Relative Humidity</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(4)" title="Reset relative humidity filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('rh-chart','relative-humidity-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('rh-chart','relative-humidity-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="wetbulb-temperature-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Wetbulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Wetbulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(5)" title="Reset wetbulb temperature filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="enthalpy-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Enthalpy</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('enthalpy-chart','enthalpy-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('enthalpy-chart','enthalpy-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Enthalpy</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(6)" title="Reset enthalpy filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('enthalpy-chart','enthalpy-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('enthalpy-chart','enthalpy-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="humidity-ratio-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Humidity Ratio</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Humidity Ratio</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(7)" title="Reset humidity ratio filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="ghi-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Global Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('ghi-chart','ghi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ghi-chart','ghi-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Global Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(8)" title="Reset GHI filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('ghi-chart','ghi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ghi-chart','ghi-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="dni-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Direct Normal Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dni-chart','dni-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dni-chart','dni-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Direct Normal Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(9)" title="Reset DNI filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('dni-chart','dni-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dni-chart','dni-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="dhi-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Diffuse Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dhi-chart','dhi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dhi-chart','dhi-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Diffuse Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(10)" title="Reset DHI filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('dhi-chart','dhi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dhi-chart','dhi-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="wind-speed-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(11)" title="Reset wind speed filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="sky-cover-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(12)" title="Reset sky cover filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="pressure-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(13)" title="Reset station pressure filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="pv-ac-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">PV AC Output (W)</div><div class="chart-download-btns"><button class="btn btn-default btn-xs xfilter-reset-btn" onclick="reset(14)" title="Reset PV AC output filter">&#x21BA; Reset</button> <button class="btn btn-default btn-xs" onclick="downloadSVG('pv-ac-chart','pv-ac-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pv-ac-chart','pv-ac-filter')">&#8659; PNG</button></div></div>
                               </div>
                             </div>
                         </div>
@@ -554,6 +592,7 @@
                                 <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
                                 <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
                                 <li><a href="#tab-degreedays" data-toggle="tab">Degree Days</a></li>
+                                <li><a href="#tab-solarpv" data-toggle="tab">Solar PV</a></li>
                             </ul>
 
                             <!-- Tab content -->
@@ -678,6 +717,116 @@
                                     </div>
                                     <div id="epwDegreeDaysChart"></div>
                                 </div><!-- /tab-degreedays -->
+
+                                <div class="tab-pane" id="tab-solarpv">
+                                    <!-- Row 1: system specs -->
+                                    <div class="pv-controls-row">
+                                        <label class="pv-label">DC System Capacity:</label>
+                                        <input id="pvDCCapacity" type="number" class="form-control pv-input-sm" value="1" min="0.1" step="0.1">
+                                        <span class="pv-label">kW</span>
+
+                                        <label class="pv-label" style="margin-left:12px;">Module Type:</label>
+                                        <select id="pvModuleType" class="form-control pv-select-sm">
+                                            <option value="0">Standard</option>
+                                            <option value="1" selected>Premium</option>
+                                            <option value="2">Thin Film</option>
+                                        </select>
+
+                                        <label class="pv-label" style="margin-left:12px;">Array Type:</label>
+                                        <select id="pvArrayType" class="form-control pv-select-sm">
+                                            <option value="0">Fixed Open Rack</option>
+                                            <option value="1" selected>Fixed Roof Mount</option>
+                                            <option value="2">1-Axis Tracking</option>
+                                            <option value="3">1-Axis Backtracking</option>
+                                            <option value="4">2-Axis Tracking</option>
+                                        </select>
+                                    </div>
+                                    <!-- Row 2: site / array geometry -->
+                                    <div class="pv-controls-row">
+                                        <label class="pv-label">System Losses:</label>
+                                        <input id="pvSystemLosses" type="number" class="form-control pv-input-sm" value="14" min="0" max="99" step="1">
+                                        <span class="pv-label">%</span>
+
+                                        <label class="pv-label" style="margin-left:12px;">Tilt:</label>
+                                        <input id="pvTilt" type="number" class="form-control pv-input-sm" value="10" min="0" max="90" step="1">
+                                        <span class="pv-label">&deg;</span>
+
+                                        <label class="pv-label" style="margin-left:12px;">Azimuth:</label>
+                                        <input id="pvAzimuth" type="number" class="form-control pv-input-sm" value="180" min="0" max="360" step="1">
+                                        <span class="pv-label">&deg;&thinsp;(180&thinsp;=&thinsp;South)</span>
+
+                                        <button id="pvRecalcBtn" class="btn btn-primary" style="margin-left:14px; font-weight:bold; padding: 6px 18px;">&#9654; Recalculate</button>
+                                    </div>
+                                    <div id="pvAnnualTotal" class="pv-annual-total"></div>
+                                    <div class="pv-chart-wrap">
+                                        <div class="pv-chart-overlay-btns">
+                                            <button class="btn btn-default btn-xs" onclick="downloadSVG('epwSolarPVChart','solar-pv-production')">&#8659; SVG</button>
+                                            <button class="btn btn-default btn-xs" onclick="downloadPNG('epwSolarPVChart','solar-pv-production')">&#8659; PNG</button>
+                                            <button class="btn btn-default btn-xs" onclick="downloadPVCSV()">&#8659; CSV</button>
+                                        </div>
+                                        <div id="epwSolarPVChart"></div>
+                                    </div>
+                                    <div class="pv-chart-wrap">
+                                        <div class="pv-chart-overlay-btns">
+                                            <button class="btn btn-default btn-xs" onclick="downloadSVG('epwSolarPOAChart','solar-poa-irradiance')">&#8659; SVG</button>
+                                            <button class="btn btn-default btn-xs" onclick="downloadPNG('epwSolarPOAChart','solar-poa-irradiance')">&#8659; PNG</button>
+                                            <button class="btn btn-default btn-xs" onclick="downloadPVCSV()">&#8659; CSV</button>
+                                        </div>
+                                        <div id="epwSolarPOAChart"></div>
+                                    </div>
+
+                                    <div class="pv-attribution">
+                                        <h5>Terminology</h5>
+                                        <b>Capacity Factor</b> = annual AC energy &divide; (DC nameplate &times; 8760&thinsp;h) &mdash;
+                                        fraction of time the system runs at full rated output; 10&ndash;20&thinsp;% is typical for fixed-tilt PV.
+                                        <br><br>
+                                        <b>Performance Ratio</b> = annual AC energy &divide; (annual POA irradiation &times; DC nameplate) &mdash;
+                                        how efficiently the system converts available sunlight into delivered energy
+                                        (accounts for temperature derating, inverter losses, and system losses); 0.75&ndash;0.85 is typical.
+                                    </div>
+
+                                    <div class="pv-attribution">
+                                        <h5>Calculation Method</h5>
+                                        The solar PV calculations in this tool follow the
+                                        <a href="https://pvwatts.nrel.gov" target="_blank">PVWatts&reg; Version 8</a>
+                                        algorithm developed by the National Renewable Energy Laboratory (NREL). There will be differences between the results from this tool and PVWatts&reg; due to differences in the underlying weather data and minor differences in the implementation, but the general trends and magnitudes should be similar.
+                                        The JavaScript implementation is ported from NREL&rsquo;s open-source
+                                        <a href="https://github.com/NREL/ssc" target="_blank">SSC (SAM Simulation Core)</a>
+                                        library.
+                                        Key sub-models:
+                                        <ul>
+                                            <li>
+                                                <b>Sky-diffuse irradiance &mdash;</b>
+                                                Perez, R., Ineichen, P., Seals, R., Michalsky, J., &amp; Stewart, R. (1990).
+                                                Modeling daylight availability and irradiance components from direct and global irradiance.
+                                                <em>Solar Energy</em>, 44(5), 271&ndash;289.
+                                                <a href="https://doi.org/10.1016/0038-092X(90)90055-H" target="_blank">doi:10.1016/0038-092X(90)90055-H</a>
+                                            </li>
+                                            <li>
+                                                <b>Incidence-angle modifier (IAM) &mdash;</b>
+                                                De Soto, W., Klein, S. A., &amp; Beckman, W. A. (2006).
+                                                Improvement and validation of a model for photovoltaic array performance.
+                                                <em>Solar Energy</em>, 80(1), 78&ndash;88.
+                                                <a href="https://doi.org/10.1016/j.solener.2005.06.010" target="_blank">doi:10.1016/j.solener.2005.06.010</a>
+                                            </li>
+                                            <li>
+                                                <b>Cell temperature &mdash;</b>
+                                                Steady-state NOCT model per
+                                                IEC&nbsp;61215 / Fuentes, M. K. (1987).
+                                                <em>A Simplified Thermal Model for Flat-Plate Photovoltaic Arrays</em>.
+                                                SAND85-0330. Sandia National Laboratories.
+                                                <a href="https://www.osti.gov/biblio/6802914" target="_blank">[OSTI]</a>
+                                            </li>
+                                            <li>
+                                                <b>Inverter &mdash;</b>
+                                                King, D. L., Gonzalez, S., Galbraith, G. M., &amp; Boyson, W. E. (2007).
+                                                <em>Performance Model for Grid-Connected Photovoltaic Inverters</em>.
+                                                SAND2007-5036. Sandia National Laboratories.
+                                                <a href="https://www.osti.gov/servlets/purl/920449" target="_blank">[OSTI]</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div><!-- /tab-solarpv -->
 
                             </div><!-- /tab-content -->
                         </div>
@@ -1177,6 +1326,9 @@
     $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
+    // epwSolarPV must run first so window._pvHourlyAC is populated before
+    // buildAllData() (called by epwTimeseriesCharts) reads from it.
+    epwSolarPV(epw);
     epwTimeseriesCharts(epw);
     epwHeatmapCharts(epw);
     epwTabularData(epw);
@@ -1212,6 +1364,7 @@
       { id: 'epwScatterChart',             name: 'scatter-chart' },
       { id: 'epwDurationChart',            name: 'duration-curve' },
       { id: 'epwDegreeDaysChart',           name: 'degree-days' },
+      { id: 'epwSolarPVChart',              name: 'solar-pv' },
       { id: 'month-chart',                name: 'month' },
       { id: 'hour-chart',                 name: 'hour' },
       { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter' },
@@ -1315,6 +1468,28 @@
     document.body.removeChild(link);
   }
 
+  function downloadPVCSV() {
+    var result = window._pvLastResult;
+    var params = window._pvLastParams;
+    if (!result || !params) { alert('No PV data to export. Load an EPW file first.'); return; }
+    var monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    var hasPOA = result.monthlyPOA && result.monthlyPOA.length === 12;
+    var header = hasPOA
+      ? 'Month,AC Energy Production (kWh),POA Irradiance (kWh/m\u00b2)'
+      : 'Month,AC Energy Production (kWh)';
+    var rows = [header];
+    monthNames.forEach(function (m, i) {
+      var row = m + ',' + result.monthly[i].toFixed(2);
+      if (hasPOA) row += ',' + result.monthlyPOA[i].toFixed(2);
+      rows.push(row);
+    });
+    var annualRow = 'Annual,' + result.annual.toFixed(2);
+    if (hasPOA) annualRow += ',' + result.annualPOA.toFixed(2);
+    rows.push(annualRow);
+    var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, 'solar-pv-production.csv');
+  }
+
   function downloadDDCSV() {
     var allData = window._tsAllData;
     if (!allData || !allData.length) { alert('No data to export. Load an EPW file first.'); return; }
@@ -1400,6 +1575,8 @@
 <div id="epw-dur-tooltip" class="epw-tooltip"></div>
 <!-- Tooltip for degree days -->
 <div id="epw-dd-tooltip" class="epw-tooltip"></div>
+<!-- Tooltip for solar PV -->
+<div id="epw-pv-tooltip" class="epw-tooltip"></div>
 
 <!-- Tooltip for heatmap charts -->
 <div id="epw-heatmap-tooltip" class="epw-tooltip"></div>
