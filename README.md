@@ -2,7 +2,7 @@
 ------
 *An online viewer and analysis tool for EnergyPlus Weather (EPW) files.*
 
-EPW files can be downloaded from [epwmap](http://mostapharoudsari.github.io/epwmap) or the [EnergyPlus weather](https://energyplus.net/weather) website.
+EPW files can be downloaded from [epwmap](https://www.ladybug.tools/epwmap/), [One Building](https://climate.onebuilding.org), or the [EnergyPlus weather](https://energyplus.net/weather) website.
 
 When an EPW file is parsed, epwvis now computes additional psychrometric properties (wet-bulb temperature, humidity ratio, specific humidity, vapor pressure, moist-air enthalpy/volume/density, and degree of saturation) using [PsychroLib](github.com/psychrometrics/psychrolib).
 

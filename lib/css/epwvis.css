@@ -135,6 +135,11 @@
   font: 14px sans-serif;
 }
 
+.hm-filter-info,
+.tbl-filter-info {
+  font-size: 14px;
+}
+
 /* ---- Timeseries tab ---- */
 .ts-controls-row {
   display: flex;
