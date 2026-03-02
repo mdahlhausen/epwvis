@@ -76,8 +76,8 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.1"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.0.5"></script>
-<script type="text/javascript" src="./lib/js/solarPV.js"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.1.2"></script>
+<script type="text/javascript" src="./lib/js/solarPV.js?v=1.0.1"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
 <script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
 <script type="text/javascript" src="./data/stations.js"></script>
@@ -558,6 +558,9 @@
                               </div>
                               <div id="pressure-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="pv-ac-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">PV AC Output (W)</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pv-ac-chart','pv-ac-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pv-ac-chart','pv-ac-filter')">&#8659; PNG</button></div></div>
                               </div>
                             </div>
                         </div>
@@ -1307,6 +1310,9 @@
     $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
+    // epwSolarPV must run first so window._pvHourlyAC is populated before
+    // buildAllData() (called by epwTimeseriesCharts) reads from it.
+    epwSolarPV(epw);
     epwTimeseriesCharts(epw);
     epwHeatmapCharts(epw);
     epwTabularData(epw);
@@ -1315,7 +1321,6 @@
     epwScatterChart(epw);
     epwDurationCurve(epw);
     epwDegreeDays(epw);
-    epwSolarPV(epw);
     epwValueFilter(epw);
   };
 
