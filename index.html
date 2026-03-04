@@ -6,7 +6,7 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.4" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.5" type="text/css"/>
 
 <!-- Dynamic color overrides (updated by settings panel JS) -->
 <style id="epv-dyn-colors">
@@ -76,7 +76,7 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.0.1"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.1.2"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.1.3"></script>
 <script type="text/javascript" src="./lib/js/solarPV.js?v=1.0.1"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
 <script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
@@ -552,8 +552,41 @@
                               <div id="wind-speed-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
                               </div>
+                              <div id="wind-direction-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Wind Direction</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-direction-chart','wind-direction-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-direction-chart','wind-direction-filter')">&#8659; PNG</button></div></div>
+                              </div>
                               <div id="sky-cover-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="opaque-sky-cover-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Opaque Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('opaque-sky-cover-chart','opaque-sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('opaque-sky-cover-chart','opaque-sky-cover-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="visibility-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Visibility</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('visibility-chart','visibility-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('visibility-chart','visibility-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="ceiling-height-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Ceiling Height</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('ceiling-height-chart','ceiling-height-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ceiling-height-chart','ceiling-height-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="precipitable-water-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Precipitable Water</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('precipitable-water-chart','precipitable-water-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('precipitable-water-chart','precipitable-water-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="aerosol-optical-depth-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Aerosol Optical Depth</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('aerosol-optical-depth-chart','aerosol-optical-depth-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('aerosol-optical-depth-chart','aerosol-optical-depth-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="snow-depth-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Snow Depth</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('snow-depth-chart','snow-depth-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('snow-depth-chart','snow-depth-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="days-since-last-snowfall-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Days Since Last Snowfall</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('days-since-last-snowfall-chart','days-since-last-snowfall-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('days-since-last-snowfall-chart','days-since-last-snowfall-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="albedo-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Albedo</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('albedo-chart','albedo-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('albedo-chart','albedo-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="liquid-precip-depth-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Liquid Precip. Depth</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('liquid-precip-depth-chart','liquid-precip-depth-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('liquid-precip-depth-chart','liquid-precip-depth-filter')">&#8659; PNG</button></div></div>
+                              </div>
+                              <div id="liquid-precip-qty-chart" class="xfilterChart">
+                                <div class="chart-title-row"><div class="title">Liquid Precip. Quantity</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('liquid-precip-qty-chart','liquid-precip-qty-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('liquid-precip-qty-chart','liquid-precip-qty-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="pressure-chart" class="xfilterChart">
                                 <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
