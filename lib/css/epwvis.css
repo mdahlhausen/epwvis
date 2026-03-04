@@ -4,7 +4,7 @@
 
 .xfilterChart {
   display: inline-block;
-  height: 100px;
+  height: auto;
   margin-bottom: 30px;
 }
 
@@ -32,6 +32,29 @@
   padding: 1px 4px;
   line-height: 1.4;
   border-radius: 2px;
+}
+
+.vf-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 9px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  color: #555;
+}
+
+.vf-range-inputs .vf-min-input,
+.vf-range-inputs .vf-max-input {
+  width: 52px;
+  font-size: 9px;
+  padding: 1px 3px;
+  height: 22px;
+  line-height: 1.4;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  box-sizing: border-box;
+  text-align: right;
 }
 
 .background.bar {
