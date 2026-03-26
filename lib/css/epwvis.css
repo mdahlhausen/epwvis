@@ -1,3 +1,255 @@
+/* ---- Bootstrap 3 → 5 aesthetic restoration ---- */
+/* BS3 used 14px base; BS5 uses 16px. Scale back the key elements. */
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  font-size: 14px;
+  background-color: white;
+  font-family: sans-serif;
+  font-weight: normal;
+}
+
+h1 { font-size: 36px; }
+h2 { font-size: 30px; }
+h3 { font-size: 24px; }
+h4 { font-size: 18px; }
+h5 { font-size: 14px; }
+h6 { font-size: 12px; }
+
+/* Buttons */
+.btn {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.btn-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+/* Navbar */
+.navbar {
+  min-height: 50px;
+  padding: 0 15px;
+}
+.navbar-brand { font-size: 18px; }
+
+/* Form controls */
+.form-control {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.form-control-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+  font-size: 14px;
+  padding: 8px 15px;
+}
+
+/* ---- end Bootstrap restoration ---- */
+
+/* ---- All outline buttons — BS3-style gradient ---- */
+.btn-outline-secondary {
+  background: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  border: 1px solid #ccc;
+  color: #333;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+  background: linear-gradient(to bottom, #ebebeb, #d9d9d9);
+  border-color: #adadad;
+  color: #333;
+}
+
+/* ---- IP / SI active-selected state ---- */
+#buttonIP.active, #buttonSI.active {
+  background: linear-gradient(to bottom, #d0d0d0, #e4e4e4);
+  border-color: #adadad;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05);
+  font-weight: bold;
+  color: #222;
+}
+
+/* ---- Browse (file input) button ---- */
+input[type="file"]::file-selector-button {
+  background: linear-gradient(to bottom, #ffffff, #e6e6e6);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  color: #333;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 4px 10px;
+  margin-right: 6px;
+}
+input[type="file"]::file-selector-button:hover {
+  background: linear-gradient(to bottom, #ebebeb, #d9d9d9);
+  border-color: #adadad;
+}
+
+/* ---- Base styles ---- */
+.heading {
+  font-size: 14px;
+  font-weight: normal;
+  font-style: italic;
+}
+
+a:link    { color: steelblue; }
+a:visited { color: grey; }
+a:hover   { color: black; }
+
+header a, header a:link    { color: steelblue; text-decoration: underline; }
+header a:visited            { color: grey;      text-decoration: underline; }
+header a:hover              { color: black;     text-decoration: underline; }
+
+/* ---- File upload / drag-drop ---- */
+.upload-drop-zone {
+  height: 60px;
+  width: 200px;
+  border-width: 2px;
+  margin-bottom: 5px;
+  color: #ccc;
+  border-style: dashed;
+  border-color: #ccc;
+  line-height: 60px;
+  text-align: center;
+}
+.upload-drop-zone.drop {
+  color: #4169E1;
+  border-color: #4169E1;
+}
+
+/* ---- Settings dropdown panel ---- */
+#settingsBtnWrap {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+#settingsPanel {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 9100;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  padding: 12px 16px 14px;
+  min-width: 300px;
+  font-size: 13px;
+  color: #333;
+}
+#settingsPanel.open { display: block; }
+.settings-section-label {
+  font-weight: bold;
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 7px 0;
+}
+.settings-separator { border-top: 1px solid #eee; margin: 11px 0; }
+.plot-color-swatches { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+.plot-color-swatch {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+  transition: border-color .1s;
+}
+.plot-color-swatch:hover { border-color: #555; }
+.plot-color-swatch.selected { border-color: #111; box-shadow: 0 0 0 1px #111; }
+.hm-scheme-options { display: flex; flex-direction: column; gap: 5px; }
+.hm-scheme-row {
+  display: flex; align-items: center; gap: 9px;
+  cursor: pointer; padding: 3px 5px; border-radius: 3px;
+}
+.hm-scheme-row:hover { background: #f4f4f4; }
+.hm-scheme-row.selected { background: #e8f0fe; }
+.hm-scheme-ramp { width: 90px; height: 13px; border-radius: 2px; flex-shrink: 0; }
+.hm-scheme-name { font-size: 12px; color: #333; }
+
+/* ---- Location search bar ---- */
+#epw-search-container {
+  position: relative;
+  display: inline-block;
+}
+#epw-search-input {
+  width: 280px;
+}
+#epw-search-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 9999;
+  width: 380px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+.epw-search-item {
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 1px solid #f0f0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.epw-search-item:hover, .epw-search-item.active {
+  background: #e8f0fe;
+}
+#epw-search-status {
+  font-size: 12px;
+  color: #888;
+  margin-top: 3px;
+  min-height: 16px;
+}
+#epw-search-status.error   { color: #c0392b; }
+#epw-search-status.loading { color: #2980b9; }
+#epw-search-status.ok      { color: #27ae60; }
+#epw-progress-bar {
+  display: none;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  margin-top: 4px;
+  overflow: hidden;
+  width: 280px;
+}
+#epw-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: #2980b9;
+  border-radius: 2px;
+  transition: width 0.12s ease;
+}
+@keyframes epw-indeterminate {
+  0%   { width: 0%;  margin-left: 0%; }
+  50%  { width: 45%; margin-left: 25%; }
+  100% { width: 0%;  margin-left: 100%; }
+}
+#epw-progress-bar.indeterminate #epw-progress-fill {
+  animation: epw-indeterminate 1.2s infinite ease-in-out;
+}
+
 #xfilterCharts {
   padding: 10px 0;
 }
@@ -26,8 +278,7 @@
   flex-shrink: 0;
 }
 
-.chart-download-btns .btn,
-.chart-download-btns .btn-xs {
+.chart-download-btns .btn {
   font-size: 9px;
   padding: 1px 4px;
   line-height: 1.4;
@@ -128,7 +379,7 @@
 }
 
 #epwChartDiv {
-  display: flex;
+  display: none; /* shown as flex by JS after EPW is loaded */
   align-items: flex-start;
 }
 
@@ -158,9 +409,16 @@
   font: 14px sans-serif;
 }
 
-.hm-filter-info,
+.hm-filter-info {
+  font-size: 14px;
+  margin: 0 0 8px 0;
+  color: #555;
+}
+
 .tbl-filter-info {
   font-size: 14px;
+  color: #555;
+  margin: 0 0 10px 0;
 }
 
 /* ---- Timeseries tab ---- */
@@ -238,3 +496,206 @@
 #epwTimeseriesDailyProfile svg {
   display: block;
 }
+
+/* ---- Heatmap variable checkbox dropdown ---- */
+.hm-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.hm-var-label {
+  font-weight: normal;
+  white-space: nowrap;
+  margin: 0;
+}
+.hm-checkbox-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.hm-dropdown-toggle {
+  min-width: 180px;
+  text-align: left;
+}
+.hm-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  min-width: 220px;
+  padding: 4px 0;
+}
+.hm-dropdown-menu.open {
+  display: block;
+}
+.hm-checkbox-item {
+  display: block;
+  padding: 5px 14px;
+  font-weight: normal;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+  font-size: 13px;
+}
+.hm-checkbox-item:hover {
+  background: #e8f0fe;
+}
+.hm-checkbox-item input {
+  margin-right: 6px;
+  cursor: pointer;
+}
+.vf-var-dropdown-wrap {
+  margin: 6px 0 4px 0;
+}
+#tab-heatmaps {
+  min-height: 480px;
+}
+
+/* ---- Tabular Data tab ---- */
+.tbl-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.tbl-var-label  { font-weight: normal; white-space: nowrap; margin: 0; }
+.tbl-var-select { width: 260px; display: inline-block; }
+#tblTableContainer table {
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 600px;
+}
+#tblTableContainer th,
+#tblTableContainer td {
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+#tblTableContainer th {
+  background: #f5f5f5;
+  font-weight: 600;
+  text-align: center;
+}
+#tblTableContainer td:first-child,
+#tblTableContainer th:first-child {
+  text-align: left;
+}
+#tblTableContainer tr.tbl-year-row td {
+  font-weight: 600;
+  background: #f0f4ff;
+}
+#tblTableContainer tr:hover td {
+  background: #f9f9f9;
+}
+#tblTableContainer tr.tbl-year-row:hover td {
+  background: #e8eeff;
+}
+
+/* ---- Duration Curve tab ---- */
+.dur-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.dur-var-label  { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
+.dur-var-select { width: 260px; display: inline-block; }
+.dur-chart-outer { position: relative; display: inline-block; }
+.dur-reflines-panel {
+  position: absolute;
+  top: 38px;
+  left: 93%;
+  background: rgba(255,255,255,0.94);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 6px 10px 8px;
+  font-size: 12px;
+  z-index: 10;
+  min-width: 82px;
+  line-height: 1.8;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+}
+.dur-ref-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 3px; }
+.dur-refline-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+  font-weight: normal;
+}
+.dur-refline-item input { margin: 0; cursor: pointer; }
+
+/* ---- Scatter Plot tab ---- */
+.scatter-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.scatter-axis-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.scatter-axis-label {
+  font-weight: normal;
+  white-space: nowrap;
+  margin: 0;
+  color: #444;
+}
+.scatter-var-select {
+  width: 240px;
+  display: inline-block;
+}
+
+/* ---- Degree Days tab ---- */
+.dd-controls-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+.dd-base-label { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
+.dd-base-input { width: 72px !important; display: inline-block; }
+.dd-totals { font-size: 13px; margin-bottom: 6px; color: #333; font-weight: normal; }
+.dd-totals .dd-hdd { color: #c0392b; font-weight: bold; }
+.dd-totals .dd-cdd { color: #1a6faf; font-weight: bold; }
+.dd-legend { display: flex; align-items: center; gap: 16px; margin-bottom: 6px; font-size: 12px; color: #444; }
+.dd-swatch { display: inline-block; width: 13px; height: 13px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+
+/* ---- Solar PV tab ---- */
+.pv-controls-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+.pv-label  { font-weight: normal; white-space: nowrap; margin: 0; color: #444; }
+.pv-input-sm { width: 72px !important; display: inline-block; }
+.pv-select-sm { width: 170px; display: inline-block; }
+.pv-annual-total { font-size: 14px; margin-bottom: 6px; color: #333; font-weight: normal; }
+.pv-metric-explain { font-size: 12px; color: #666; margin-bottom: 12px; line-height: 1.55; }
+.pv-section-title { font-size: 13px; font-weight: bold; color: #333; margin: 14px 0 4px 0; }
+.pv-attribution {
+  margin-top: 24px;
+  padding: 12px 16px;
+  background: #f7f7f7;
+  border-left: 3px solid #bbb;
+  border-radius: 3px;
+  font-size: 11.5px;
+  color: #555;
+  line-height: 1.7;
+}
+.pv-attribution h5 {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #444;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.pv-attribution ul { margin: 0; padding-left: 18px; }
+.pv-attribution li { margin-bottom: 3px; }
+.pv-chart-wrap { display: inline-block; }
+.pv-chart-overlay-btns { text-align: right; margin-bottom: 4px; width: 100%; }
+.pv-chart-overlay-btns .btn { margin-left: 3px; }
