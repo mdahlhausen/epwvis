@@ -5,7 +5,7 @@
 
 <title>epwvis</title>
 <!-- load css -->
-<link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
 <link rel="stylesheet" href="./lib/css/epwvis.css?v=1.0.5" type="text/css"/>
 
 <!-- Dynamic color overrides (updated by settings panel JS) -->
@@ -70,7 +70,6 @@
 </style>
 
 <!-- load javascript libraries -->
-<script type="text/javascript" src="./lib/js/jQuery/jquery-2.2.4.min.js"></script>
 <script type="text/javascript" src="./lib/js/bootstrap/bootstrap.min.js"></script>
 <script type="text/javascript" src="./lib/js/d3/d3.min.js"></script>
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
@@ -405,9 +404,9 @@
 
     <!-- header -->
     <header>
-      <nav class="navbar navbar-default navbar-static-top">
+      <nav class="navbar navbar-expand navbar-light bg-light">
           <div class="container-fluid">
-            <div class="navbar-header">
+            <div>
               <span>
               <h3>epwvis
                 <span class="heading"> - An online viewer and analysis tool for EnergyPlus Weather (EPW) files.
@@ -445,38 +444,38 @@
                 <div class="col-lg-12">
 
                     <!-- second nav bar -->
-                    <div class="collapse navbar-collapse">
-                        <ul class="nav navbar-nav">
-                          <li>
-                            <label>Select EPW File:</label>
-                            <input type="file" id="fileinput" style="width:200px;"></input>
-                          </li>
-                          <li style="text-align:center; padding-right:15px;"><h3>OR</h3></li>
-                          <li>
+                    <div class="d-flex flex-wrap align-items-center gap-3 py-2">
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                          <div>
+                            <label style="display:block; font-size:14px; font-weight:bold; margin-bottom:3px;">Select EPW File:</label>
+                            <input type="file" id="fileinput" style="width:200px;">
+                          </div>
+                          <div style="text-align:center;"><h3>OR</h3></div>
+                          <div>
                             <!-- from: http://bootsnipp.com/snippets/featured/bootstrap-drag-and-drop-upload -->
                             <div class="upload-drop-zone" id="drop-zone">
                                 drag and drop EPW file here
                             </div>
-                          </li>
-                          <li style="text-align:center; padding-right:15px; padding-left:15px;"><h3>OR</h3></li>
-                          <li style="padding-top:6px;">
+                          </div>
+                          <div style="text-align:center;"><h3>OR</h3></div>
+                          <div style="padding-top:6px;">
                             <div id="epw-search-container">
                               <div style="font-size:11px; color:#888; margin-bottom:3px;">TMYx 2009–2023 weather files from <a href="https://climate.onebuilding.org" target="_blank">OneBuilding</a></div>
                               <input type="text" id="epw-search-input"
-                                class="form-control input-sm"
+                                class="form-control form-control-sm"
                                 placeholder="Search location (e.g. Denver CO, Paris, Tokyo)..."
                                 autocomplete="off">
                               <div id="epw-search-dropdown"></div>
                               <div id="epw-search-status">Loading station list…</div>
                               <div id="epw-progress-bar"><div id="epw-progress-fill"></div></div>
                             </div>
-                          </li>
-                        </ul>
+                          </div>
+                        </div>  <!-- left nav items -->
 
-                        <ul class="nav navbar-nav navbar-right">
-                          <li style="display:flex; align-items:center; gap:10px; padding:0 6px;">
+                        <div class="d-flex align-items-center gap-2 ms-auto">
+                          <div style="display:flex; align-items:center; gap:10px;">
                             <div id="settingsBtnWrap" style="position:relative;">
-                              <button id="settingsBtn" class="btn btn-default" style="font-size:15px;">Settings</button>
+                              <button id="settingsBtn" class="btn btn-outline-secondary" style="font-size:15px;">Settings</button>
                               <div id="settingsPanel">
                                 <div class="settings-section-label">Plot Color</div>
                                 <div class="plot-color-swatches" id="plotColorSwatches"></div>
@@ -486,113 +485,113 @@
                               </div>
                             </div>
                             <span style="font-size:15px; color:#555; white-space:nowrap;">Unit System:</span>
-                            <div class="btn-group" data-toggle="buttons">
-                              <button type="button" class="btn btn-default active" id="buttonIP">IP</button>
-                              <button type="button" class="btn btn-default" id="buttonSI">SI</button>
+                            <div class="btn-group">
+                              <button type="button" class="btn btn-outline-secondary active" id="buttonIP">IP</button>
+                              <button type="button" class="btn btn-outline-secondary" id="buttonSI">SI</button>
                             </div>
-                          </li>
-                        </ul>
+                          </div>
+                        </div>  <!-- right nav items -->
                     </div>  <!-- second nav bar -->
 
-                    <h3 id="stationName" style="display:inline-block; margin-right:8px;"></h3>
+                    <h4 id="stationName" style="display:inline-block; margin-right:8px;"></h4>
                     <span id="downloadAllBtns" style="display:none;">
-                    <button onclick="downloadAllSVG()" class="btn btn-default btn-sm" style="vertical-align:middle;">Download All SVG</button>
-                    <button onclick="downloadAllPNG()" class="btn btn-default btn-sm" style="vertical-align:middle;">Download All PNG</button>
+                    <button onclick="downloadAllSVG()" class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;">Download All SVG</button>
+                    <button onclick="downloadAllPNG()" class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;">Download All PNG</button>
                     </span>
 
                     <div id="epwChartDiv">
 
                         <div id="epwSidebar">
-                            <h3 style="margin-top:8px; margin-bottom:4px;">Value Filter
-                                <button onclick="resetAll()" class="btn btn-default btn-sm" style="vertical-align:middle;">Reset Filters</button>
+                            <h4 style="margin-top:8px; margin-bottom:4px;">Value Filter
+                                <button onclick="resetAll()" class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;">Reset Filters</button>
                                 <span style="display:inline-block; vertical-align:middle;">
                                   <div class="hm-checkbox-dropdown" id="vfDropdown">
-                                    <button type="button" class="btn btn-default btn-sm hm-dropdown-toggle" id="vfDropdownToggle">Select Value Filters <span class="caret"></span></button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm hm-dropdown-toggle" id="vfDropdownToggle">Select Value Filters &#9660;</button>
                                     <div class="hm-dropdown-menu" id="vfDropdownMenu"></div>
                                   </div>
                                 </span>
-                            </h3>
+                            </h4>
                             <p style="font-size:smaller; margin-bottom:4px;"><span id="xfilterActive">-</span> of <span id="xfilterTotal">-</span> hours (<span id="xfilterPercent">-</span>) selected.</p>
                             <p id="tempFilterExamples"></p>
 
                             <div id="xfilterCharts">
                               <div id="month-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Month</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('month-chart','month')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('month-chart','month')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Month</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('month-chart','month')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('month-chart','month')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="hour-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Hour</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('hour-chart','hour')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('hour-chart','hour')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Hour</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('hour-chart','hour')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('hour-chart','hour')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="drybulb-temperature-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Drybulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Drybulb Temperature</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('drybulb-temperature-chart','drybulb-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="dewpoint-temperature-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Dewpoint Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Dewpoint Temperature</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('dewpoint-temperature-chart','dewpoint-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="rh-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Relative Humidity</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('rh-chart','relative-humidity-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('rh-chart','relative-humidity-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Relative Humidity</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('rh-chart','relative-humidity-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('rh-chart','relative-humidity-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="wetbulb-temperature-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Wetbulb Temperature</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Wetbulb Temperature</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('wetbulb-temperature-chart','wetbulb-temperature-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="enthalpy-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Enthalpy</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('enthalpy-chart','enthalpy-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('enthalpy-chart','enthalpy-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Enthalpy</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('enthalpy-chart','enthalpy-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('enthalpy-chart','enthalpy-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="humidity-ratio-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Humidity Ratio</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Humidity Ratio</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('humidity-ratio-chart','humidity-ratio-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="ghi-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Global Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('ghi-chart','ghi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ghi-chart','ghi-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Global Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('ghi-chart','ghi-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('ghi-chart','ghi-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="dni-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Direct Normal Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dni-chart','dni-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dni-chart','dni-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Direct Normal Radiation</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('dni-chart','dni-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('dni-chart','dni-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="dhi-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Diffuse Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('dhi-chart','dhi-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('dhi-chart','dhi-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Diffuse Horiz. Radiation</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('dhi-chart','dhi-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('dhi-chart','dhi-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="wind-speed-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Wind Speed</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('wind-speed-chart','wind-speed-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('wind-speed-chart','wind-speed-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="wind-direction-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Wind Direction</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('wind-direction-chart','wind-direction-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('wind-direction-chart','wind-direction-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Wind Direction</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('wind-direction-chart','wind-direction-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('wind-direction-chart','wind-direction-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="sky-cover-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Total Sky Cover</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('sky-cover-chart','sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('sky-cover-chart','sky-cover-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="opaque-sky-cover-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Opaque Sky Cover</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('opaque-sky-cover-chart','opaque-sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('opaque-sky-cover-chart','opaque-sky-cover-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Opaque Sky Cover</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('opaque-sky-cover-chart','opaque-sky-cover-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('opaque-sky-cover-chart','opaque-sky-cover-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="visibility-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Visibility</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('visibility-chart','visibility-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('visibility-chart','visibility-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Visibility</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('visibility-chart','visibility-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('visibility-chart','visibility-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="ceiling-height-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Ceiling Height</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('ceiling-height-chart','ceiling-height-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('ceiling-height-chart','ceiling-height-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Ceiling Height</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('ceiling-height-chart','ceiling-height-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('ceiling-height-chart','ceiling-height-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="precipitable-water-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Precipitable Water</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('precipitable-water-chart','precipitable-water-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('precipitable-water-chart','precipitable-water-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Precipitable Water</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('precipitable-water-chart','precipitable-water-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('precipitable-water-chart','precipitable-water-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="aerosol-optical-depth-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Aerosol Optical Depth</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('aerosol-optical-depth-chart','aerosol-optical-depth-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('aerosol-optical-depth-chart','aerosol-optical-depth-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Aerosol Optical Depth</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('aerosol-optical-depth-chart','aerosol-optical-depth-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('aerosol-optical-depth-chart','aerosol-optical-depth-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="snow-depth-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Snow Depth</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('snow-depth-chart','snow-depth-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('snow-depth-chart','snow-depth-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Snow Depth</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('snow-depth-chart','snow-depth-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('snow-depth-chart','snow-depth-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="days-since-last-snowfall-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Days Since Last Snowfall</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('days-since-last-snowfall-chart','days-since-last-snowfall-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('days-since-last-snowfall-chart','days-since-last-snowfall-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Days Since Last Snowfall</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('days-since-last-snowfall-chart','days-since-last-snowfall-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('days-since-last-snowfall-chart','days-since-last-snowfall-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="albedo-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Albedo</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('albedo-chart','albedo-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('albedo-chart','albedo-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Albedo</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('albedo-chart','albedo-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('albedo-chart','albedo-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="liquid-precip-depth-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Liquid Precip. Depth</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('liquid-precip-depth-chart','liquid-precip-depth-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('liquid-precip-depth-chart','liquid-precip-depth-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Liquid Precip. Depth</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('liquid-precip-depth-chart','liquid-precip-depth-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('liquid-precip-depth-chart','liquid-precip-depth-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="liquid-precip-qty-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Liquid Precip. Quantity</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('liquid-precip-qty-chart','liquid-precip-qty-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('liquid-precip-qty-chart','liquid-precip-qty-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Liquid Precip. Quantity</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('liquid-precip-qty-chart','liquid-precip-qty-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('liquid-precip-qty-chart','liquid-precip-qty-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="pressure-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">Station Pressure</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('pressure-chart','pressure-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('pressure-chart','pressure-filter')">&#8659; PNG</button></div></div>
                               </div>
                               <div id="pv-ac-chart" class="xfilterChart">
-                                <div class="chart-title-row"><div class="title">PV AC Output (W)</div><div class="chart-download-btns"><button class="btn btn-default btn-xs" onclick="downloadSVG('pv-ac-chart','pv-ac-filter')">&#8659; SVG</button> <button class="btn btn-default btn-xs" onclick="downloadPNG('pv-ac-chart','pv-ac-filter')">&#8659; PNG</button></div></div>
+                                <div class="chart-title-row"><div class="title">PV AC Output (W)</div><div class="chart-download-btns"><button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('pv-ac-chart','pv-ac-filter')">&#8659; SVG</button> <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('pv-ac-chart','pv-ac-filter')">&#8659; PNG</button></div></div>
                               </div>
                             </div>
                         </div>
@@ -600,28 +599,28 @@
                         <div id="epwMain">
                             <!-- Tab navigation -->
                             <ul class="nav nav-tabs" id="chartTabs" role="tablist" style="margin-bottom:12px;">
-                                <li class="active"><a href="#tab-timeseries" data-toggle="tab">Timeseries</a></li>
-                                <li><a href="#tab-heatmaps" data-toggle="tab">Heatmaps</a></li>
-                                <li><a href="#tab-duration" data-toggle="tab">Duration Curve</a></li>
-                                <li><a href="#tab-scatter" data-toggle="tab">Scatter Plot</a></li>
-                                <li><a href="#tab-tabular" data-toggle="tab">Tabular Data</a></li>
-                                <li><a href="#tab-windrose" data-toggle="tab">Wind Rose</a></li>
-                                <li><a href="#tab-psychro" data-toggle="tab">Psychrometric Chart</a></li>
-                                <li><a href="#tab-degreedays" data-toggle="tab">Degree Days</a></li>
-                                <li><a href="#tab-solarpv" data-toggle="tab">Solar PV</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link active" href="#tab-timeseries" data-bs-toggle="tab" role="tab">Timeseries</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-heatmaps" data-bs-toggle="tab" role="tab">Heatmaps</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-duration" data-bs-toggle="tab" role="tab">Duration Curve</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-scatter" data-bs-toggle="tab" role="tab">Scatter Plot</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-tabular" data-bs-toggle="tab" role="tab">Tabular Data</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-windrose" data-bs-toggle="tab" role="tab">Wind Rose</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-psychro" data-bs-toggle="tab" role="tab">Psychrometric Chart</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-degreedays" data-bs-toggle="tab" role="tab">Degree Days</a></li>
+                                <li class="nav-item" role="presentation"><a class="nav-link" href="#tab-solarpv" data-bs-toggle="tab" role="tab">Solar PV</a></li>
                             </ul>
 
                             <!-- Tab content -->
                             <div class="tab-content">
 
-                                <div class="tab-pane active" id="tab-timeseries">
+                                <div class="tab-pane fade show active" id="tab-timeseries">
                                     <div class="ts-controls-row">
                                         <label for="tsVariableSelect" class="ts-var-label">Variable:</label>
                                         <select id="tsVariableSelect" class="form-control ts-var-select"></select>
                                     </div>
                                     <h4 class="ts-section-header">Annual Timeseries
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesAnnual','timeseries-annual')">&#8659; SVG</button>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesAnnual','timeseries-annual')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesAnnual','timeseries-annual')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesAnnual','timeseries-annual')">&#8659; PNG</button>
                                         <span class="ts-legend-hint">
                                             <span class="ts-swatch ts-swatch-grey"></span>All data (min–max range + daily avg)
                                             &nbsp;
@@ -632,19 +631,19 @@
                                         <div id="epwTimeseriesAnnual"></div>
                                     </div>
                                     <h4 class="ts-section-header">Average Daily Profile by Month
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; SVG</button>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; PNG</button>
                                         <span class="ts-legend-hint">One panel per month &nbsp;|&nbsp; Grey band = all-data min–max &nbsp;|&nbsp; Color band + line = filtered avg &amp; min–max</span>
                                     </h4>
                                     <div id="epwTimeseriesDailyProfile"></div>
                                 </div><!-- /tab-timeseries -->
 
-                                <div class="tab-pane" id="tab-heatmaps">
+                                <div class="tab-pane fade" id="tab-heatmaps">
                                     <div class="hm-controls-row">
                                         <label class="hm-var-label">Variables to display:</label>
                                         <div class="hm-checkbox-dropdown" id="hmDropdown">
-                                            <button type="button" class="btn btn-default btn-sm hm-dropdown-toggle" id="hmDropdownToggle">
-                                                Select variables <span class="caret"></span>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm hm-dropdown-toggle" id="hmDropdownToggle">
+                                                Select variables &#9660;
                                             </button>
                                             <div class="hm-dropdown-menu" id="hmDropdownMenu"></div>
                                         </div>
@@ -653,12 +652,12 @@
                                     <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
 
-                                <div class="tab-pane" id="tab-duration">
+                                <div class="tab-pane fade" id="tab-duration">
                                     <div class="dur-controls-row">
                                         <label for="durVariableSelect" class="dur-var-label">Variable:</label>
                                         <select id="durVariableSelect" class="form-control dur-var-select"></select>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwDurationChart','duration-curve')">&#8659; SVG</button>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwDurationChart','duration-curve')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwDurationChart','duration-curve')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwDurationChart','duration-curve')">&#8659; PNG</button>
                                     </div>
                                     <div class="dur-chart-outer">
                                         <div id="epwDurationChart"></div>
@@ -666,7 +665,7 @@
                                     </div>
                                 </div><!-- /tab-duration -->
 
-                                <div class="tab-pane" id="tab-scatter">
+                                <div class="tab-pane fade" id="tab-scatter">
                                     <div class="scatter-controls-row">
                                         <div class="scatter-axis-group">
                                             <label for="scatterXSelect" class="scatter-axis-label">X axis:</label>
@@ -676,43 +675,43 @@
                                             <label for="scatterYSelect" class="scatter-axis-label">Y axis:</label>
                                             <select id="scatterYSelect" class="form-control scatter-var-select"></select>
                                         </div>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwScatterChart','scatter-chart')">&#8659; SVG</button>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwScatterChart','scatter-chart')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:4px;" onclick="downloadSVG('epwScatterChart','scatter-chart')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwScatterChart','scatter-chart')">&#8659; PNG</button>
                                     </div>
                                     <div id="epwScatterChart"></div>
                                 </div><!-- /tab-scatter -->
 
-                                <div class="tab-pane" id="tab-tabular">
+                                <div class="tab-pane fade" id="tab-tabular">
                                     <div class="tbl-controls-row">
                                         <label for="tblVariableSelect" class="tbl-var-label">Variable:</label>
                                         <select id="tblVariableSelect" class="form-control tbl-var-select"></select>
-                                        <button id="tblDownloadCSV" class="btn btn-default btn-sm" style="margin-left:12px;">&#8659; CSV</button>
+                                        <button id="tblDownloadCSV" class="btn btn-outline-secondary btn-sm" style="margin-left:12px;">&#8659; CSV</button>
                                     </div>
                                     <p id="tblFilterInfo" class="tbl-filter-info"></p>
                                     <div id="tblTableContainer"></div>
                                 </div><!-- /tab-tabular -->
 
-                                <div class="tab-pane" id="tab-windrose">
+                                <div class="tab-pane fade" id="tab-windrose">
                                     <div id="WindRose">
                                         <h3>Wind Rose
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
                                         </h3>
                                         <div id="epwWindRose"></div>
                                     </div>
                                 </div><!-- /tab-windrose -->
 
-                                <div class="tab-pane" id="tab-psychro">
+                                <div class="tab-pane fade" id="tab-psychro">
                                     <div id="PsychroChart">
                                         <h3>Psychrometric Chart
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
-                                          <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
                                         </h3>
                                         <div id="epwPsychroChart"></div>
                                     </div>
                                 </div><!-- /tab-psychro -->
 
-                                <div class="tab-pane" id="tab-degreedays">
+                                <div class="tab-pane fade" id="tab-degreedays">
                                     <div class="dd-controls-row">
                                         <label class="dd-base-label">Heating base:</label>
                                         <input id="ddHeatBase" type="number" class="form-control dd-base-input" value="65" step="1">
@@ -720,9 +719,9 @@
                                         <label class="dd-base-label" style="margin-left:14px;">Cooling base:</label>
                                         <input id="ddCoolBase" type="number" class="form-control dd-base-input" value="65" step="1">
                                         <span id="ddCoolUnit" class="dd-base-label">&deg;F</span>
-                                        <button class="btn btn-default btn-xs" style="margin-left:14px; vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysChart','degree-days')">&#8659; PNG</button>
-                                        <button class="btn btn-default btn-xs" style="vertical-align:middle;" onclick="downloadDDCSV()">&#8659; CSV</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="margin-left:14px; vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysChart','degree-days')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadDDCSV()">&#8659; CSV</button>
                                     </div>
                                     <div id="ddTotals" class="dd-totals"></div>
                                     <div class="dd-legend">
@@ -734,7 +733,7 @@
                                     <div id="epwDegreeDaysChart"></div>
                                 </div><!-- /tab-degreedays -->
 
-                                <div class="tab-pane" id="tab-solarpv">
+                                <div class="tab-pane fade" id="tab-solarpv">
                                     <!-- Row 1: system specs -->
                                     <div class="pv-controls-row">
                                         <label class="pv-label">DC System Capacity:</label>
@@ -776,17 +775,17 @@
                                     <div id="pvAnnualTotal" class="pv-annual-total"></div>
                                     <div class="pv-chart-wrap">
                                         <div class="pv-chart-overlay-btns">
-                                            <button class="btn btn-default btn-xs" onclick="downloadSVG('epwSolarPVChart','solar-pv-production')">&#8659; SVG</button>
-                                            <button class="btn btn-default btn-xs" onclick="downloadPNG('epwSolarPVChart','solar-pv-production')">&#8659; PNG</button>
-                                            <button class="btn btn-default btn-xs" onclick="downloadPVCSV()">&#8659; CSV</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwSolarPVChart','solar-pv-production')">&#8659; SVG</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwSolarPVChart','solar-pv-production')">&#8659; PNG</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadPVCSV()">&#8659; CSV</button>
                                         </div>
                                         <div id="epwSolarPVChart"></div>
                                     </div>
                                     <div class="pv-chart-wrap">
                                         <div class="pv-chart-overlay-btns">
-                                            <button class="btn btn-default btn-xs" onclick="downloadSVG('epwSolarPOAChart','solar-poa-irradiance')">&#8659; SVG</button>
-                                            <button class="btn btn-default btn-xs" onclick="downloadPNG('epwSolarPOAChart','solar-poa-irradiance')">&#8659; PNG</button>
-                                            <button class="btn btn-default btn-xs" onclick="downloadPVCSV()">&#8659; CSV</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwSolarPOAChart','solar-poa-irradiance')">&#8659; SVG</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwSolarPOAChart','solar-poa-irradiance')">&#8659; PNG</button>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="downloadPVCSV()">&#8659; CSV</button>
                                         </div>
                                         <div id="epwSolarPOAChart"></div>
                                     </div>
@@ -1339,7 +1338,7 @@
   function updateCharts(epw,unitSystem) {
     console.log("drawing charts in " + unitSystem + " units");
     clearEPWCharts();
-    $("#epwChartDiv").css("display", "flex"); //unhide as flex layout
+    document.getElementById("epwChartDiv").style.display = "flex"; //unhide as flex layout
 
     // draw all charts (tabs just hide/show; all SVGs are always rendered)
     // epwSolarPV must run first so window._pvHourlyAC is populated before
@@ -1356,16 +1355,16 @@
     epwValueFilter(epw);
   };
 
-  $("#buttonIP").on("click", function(e) {
-    $(this).toggleClass("active");
-    $("#buttonSI").toggleClass("active");
+  document.getElementById("buttonIP").addEventListener("click", function(e) {
+    this.classList.toggle("active");
+    document.getElementById("buttonSI").classList.toggle("active");
     unitSystem = "IP";
     updateCharts(epw,unitSystem);
   });
 
-  $("#buttonSI").on("click", function(e) {
-    $(this).toggleClass("active");
-    $("#buttonIP").toggleClass("active");
+  document.getElementById("buttonSI").addEventListener("click", function(e) {
+    this.classList.toggle("active");
+    document.getElementById("buttonIP").classList.toggle("active");
     unitSystem = "SI";
     updateCharts(epw,unitSystem);
   });

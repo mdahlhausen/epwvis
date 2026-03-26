@@ -1,3 +1,54 @@
+/* ---- Bootstrap 3 → 5 aesthetic restoration ---- */
+/* BS3 used 14px base; BS5 uses 16px. Scale back the key elements. */
+body {
+  font-size: 14px;
+}
+h1 { font-size: 36px; }
+h2 { font-size: 30px; }
+h3 { font-size: 24px; }
+h4 { font-size: 18px; }
+h5 { font-size: 14px; }
+h6 { font-size: 12px; }
+
+/* Buttons */
+.btn {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.btn-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+/* Navbar */
+.navbar {
+  min-height: 50px;
+  padding: 0 15px;
+}
+.navbar-brand { font-size: 18px; }
+
+/* Form controls */
+.form-control {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+.form-control-sm {
+  font-size: 12px;
+  padding: 5px 10px;
+  border-radius: 3px;
+}
+
+/* Tabs */
+.nav-tabs .nav-link {
+  font-size: 14px;
+  padding: 8px 15px;
+}
+
+/* ---- end Bootstrap restoration ---- */
+
 #xfilterCharts {
   padding: 10px 0;
 }
