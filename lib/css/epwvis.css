@@ -493,7 +493,9 @@ header a:hover              { color: black;     text-decoration: underline; }
 }
 
 #epwTimeseriesAnnual svg,
-#epwTimeseriesDailyProfile svg {
+#epwTimeseriesDailyProfile svg,
+#epwSunChart svg,
+#epwSunCartesian svg {
   display: block;
 }
 
