@@ -20,7 +20,7 @@
 <script type="text/javascript" src="./lib/js/d3/d3.min.js"></script>
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
-<script type="text/javascript" src="./lib/js/epw2json.js?v=1.1.0"></script>
+<script type="text/javascript" src="./lib/js/epw2json.js?v=1.2.0"></script>
 <script type="text/javascript" src="./lib/js/epwCharts.js?v=1.2.4"></script>
 <script type="text/javascript" src="./lib/js/solarPV.js?v=1.1.0"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
@@ -123,11 +123,14 @@
                         </div>  <!-- right nav items -->
                     </div>  <!-- second nav bar -->
 
-                    <h4 id="stationName" style="display:inline-block; margin-right:8px;"></h4>
-                    <span id="downloadAllBtns" style="display:none;">
-                    <button onclick="downloadAllSVG()" class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;">Download All SVG</button>
-                    <button onclick="downloadAllPNG()" class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;">Download All PNG</button>
-                    </span>
+                    <div style="display:flex; align-items:center; justify-content:space-between;">
+                      <h4 id="stationName" style="margin:0;"></h4>
+                      <span id="downloadAllBtns" style="display:none;">
+                        <button onclick="downloadAllSVG()" class="btn btn-outline-secondary btn-sm">Download All SVG</button>
+                        <button onclick="downloadAllPNG()" class="btn btn-outline-secondary btn-sm">Download All PNG</button>
+                      </span>
+                    </div>
+                    <div id="koppenClassification" style="font-size:14px; color:#555; margin:2px 0 6px 0;"></div>
 
                     <div id="epwChartDiv">
 
@@ -703,6 +706,22 @@
     }
   }
 
+  // Update the Köppen climate classification display below the station name.
+  function setKoppenClassification(epw) {
+    var el = document.getElementById('koppenClassification');
+    if (!el) return;
+    var k;
+    try { k = epw.koppenClassification(); } catch(e) { el.innerHTML = ''; return; }
+    if (!k) { el.innerHTML = ''; return; }
+    if (k.code === '?') {
+      el.innerHTML = '<span style="color:#aaa; font-size:13px;">K\u00f6ppen climate classification: insufficient precipitation data in EPW file</span>';
+      return;
+    }
+    var desc = k.description.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    el.innerHTML = 'K\u00f6ppen climate classification: <strong>' + k.code + '</strong>'
+      + ' \u2014 <span title="' + desc + '" style="border-bottom:1px dotted #888; cursor:help;">' + k.name + '</span>';
+  }
+
   // Stream a fetch Response body while updating the progress bar.
   // Returns Promise<Uint8Array>.
   function streamResponse(response) {
@@ -799,6 +818,7 @@
           'Weather for ' + epw.stationLocation +
           ' <small style="font-size:12px;color:#888;">(TMYx 2009-2023, via <a href="' +
           stationUrl(station) + '" target="_blank">OneBuilding</a>)</small>';
+        setKoppenClassification(epw);
         document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem);
         setSearchStatus('Loaded: ' + station.n, 'ok');
@@ -883,6 +903,7 @@
 
 		//console.log(epw);
 		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
+        setKoppenClassification(epw);
         document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem)
       };
@@ -937,6 +958,7 @@
           'Weather for ' + epw.stationLocation +
           ' <small style="font-size:12px;color:#888;">(<a href="' +
           url + '" target="_blank">source</a>)</small>';
+        setKoppenClassification(epw);
         document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem);
         setSearchStatus('Loaded: ' + label, 'ok');
