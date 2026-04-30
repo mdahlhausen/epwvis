@@ -395,11 +395,13 @@
                                         <label class="dd-base-label" style="margin-left:14px;">Cooling base:</label>
                                         <input id="ddCoolBase" type="number" class="form-control dd-base-input" value="65" step="1">
                                         <span id="ddCoolUnit" class="dd-base-label">&deg;F</span>
-                                        <button class="btn btn-outline-secondary btn-sm" style="margin-left:14px; vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
+                                    </div>
+                                    <div id="ddTotals" class="dd-totals"></div>
+                                    <div style="margin-top:6px;">
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysChart','degree-days')">&#8659; PNG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadDDCSV()">&#8659; CSV</button>
                                     </div>
-                                    <div id="ddTotals" class="dd-totals"></div>
                                     <div class="dd-legend">
                                         <span><span class="dd-swatch" style="background:#c0392b;"></span>Heating DD (filtered)</span>
                                         <span><span class="dd-swatch" style="background:#e8a9a0;"></span>Heating DD (all data)</span>
@@ -407,6 +409,22 @@
                                         <span><span class="dd-swatch" style="background:#a0c4e8;"></span>Cooling DD (all data)</span>
                                     </div>
                                     <div id="epwDegreeDaysChart"></div>
+                                    <div id="ddByTempTotals" class="dd-totals"></div>
+                                    <div style="margin-top:6px;">
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysByTempChart','degree-days-by-temp')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysByTempChart','degree-days-by-temp')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadDDByTempCSV()">&#8659; CSV</button>
+                                    </div>
+                                    <div id="epwDegreeDaysByTempChart"></div>
+
+                                    <div class="pv-attribution">
+                                        <h5>Terminology</h5>
+                                        <b>Degree Days</b> — a measure of how much, and for how long, the outdoor temperature deviates from a base (balance point) temperature. Each hour that the dry-bulb temperature is below the heating base contributes <em>(base &minus; T<sub>drybulb</sub>) &divide; 24</em> heating degree-days (HDD); each hour above the cooling base contributes <em>(T<sub>drybulb</sub> &minus; base) &divide; 24</em> cooling degree-days (CDD). Annual totals are used to estimate heating and cooling energy consumption.
+                                        <br><br>
+                                        <b>Balance Point Temperature</b> — the outdoor temperature at which a building neither needs heating nor cooling. It depends on internal heat gains (occupants, lighting, equipment), solar gains, and how well-insulated the envelope is. A lower balance point means the building retains heat well and needs heating only in colder conditions.
+                                        <br><br>
+                                        More efficient buildings may have lower heating bases (internal gains and solar gains keep the building warm longer without mechanical heating) depending on climate zone.
+                                    </div>
                                 </div><!-- /tab-degreedays -->
 
                                 <div class="tab-pane fade" id="tab-solarpv">
@@ -1322,6 +1340,62 @@
 
     var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
     triggerBlobDownload(blob, 'degree-days.csv');
+  }
+
+  function downloadDDByTempCSV() {
+    var allData = window._tsAllData;
+    if (!allData || !allData.length) { alert('No data to export. Load an EPW file first.'); return; }
+    var activeData = window._ddLastActive || allData;
+    var isIP = (unitSystem === 'IP');
+    var defaultBase = isIP ? 65 : 18;
+    var hBase = window._ddHeatBase || defaultBase;
+    var cBase = window._ddCoolBase || defaultBase;
+    var uLabel = isIP ? 'F' : 'C';
+    var binSize = isIP ? 5 : 2;
+
+    var allTemps = allData.map(function(d) { return d.dryBulbTemperature; });
+    var tMin = Math.floor(d3.min(allTemps) / binSize) * binSize;
+    var tMax = Math.ceil(d3.max(allTemps)  / binSize) * binSize;
+    var bins = [];
+    for (var t = tMin; t < tMax; t += binSize) { bins.push(t); }
+
+    function accumBins(data) {
+      var hdd = {}, cdd = {};
+      bins.forEach(function(b) { hdd[b] = 0; cdd[b] = 0; });
+      data.forEach(function(d) {
+        var db  = d.dryBulbTemperature;
+        var bin = Math.floor(db / binSize) * binSize;
+        if (hdd[bin] === undefined) return;
+        hdd[bin] += Math.max(0, hBase - db) / 24;
+        cdd[bin] += Math.max(0, db - cBase) / 24;
+      });
+      return { hdd: hdd, cdd: cdd };
+    }
+
+    var allBins    = accumBins(allData);
+    var activeBins = accumBins(activeData);
+
+    var rows = [
+      'Bin Low (' + uLabel + '),' +
+      'Bin High (' + uLabel + '),' +
+      'HDD Filtered (base ' + hBase + '\u00b0' + uLabel + '),' +
+      'CDD Filtered (base ' + cBase + '\u00b0' + uLabel + '),' +
+      'HDD All Data (base ' + hBase + '\u00b0' + uLabel + '),' +
+      'CDD All Data (base ' + cBase + '\u00b0' + uLabel + ')'
+    ];
+    bins.forEach(function(b) {
+      rows.push([
+        b,
+        b + binSize,
+        (activeBins.hdd[b] || 0).toFixed(4),
+        (activeBins.cdd[b] || 0).toFixed(4),
+        (allBins.hdd[b]    || 0).toFixed(4),
+        (allBins.cdd[b]    || 0).toFixed(4)
+      ].join(','));
+    });
+
+    var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, 'degree-days-by-temp.csv');
   }
 
   function downloadPNG(containerId, filename) {
