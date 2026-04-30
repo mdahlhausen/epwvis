@@ -113,6 +113,24 @@
                                 <div class="settings-separator"></div>
                                 <div class="settings-section-label">Heatmap Color Scheme</div>
                                 <div class="hm-scheme-options" id="hmSchemeOptions"></div>
+                                <div class="settings-separator"></div>
+                                <div class="settings-section-label">Export</div>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeTitle" checked>
+                                  Include chart titles in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeFilter" checked>
+                                  Include filter extents in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeDataLabel" checked>
+                                  Include data labels in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeLegend" checked>
+                                  Include legends in export
+                                </label>
                               </div>
                             </div>
                             <span style="font-size:15px; color:#555; white-space:nowrap;">Unit System:</span>
@@ -269,11 +287,6 @@
                                     <h4 class="ts-section-header">Annual Timeseries
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesAnnual','timeseries-annual')">&#8659; SVG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesAnnual','timeseries-annual')">&#8659; PNG</button>
-                                        <span class="ts-legend-hint">
-                                            <span class="ts-swatch ts-swatch-grey"></span>All data (min–max range + daily avg)
-                                            &nbsp;
-                                            <span class="ts-swatch ts-swatch-blue"></span>Filtered data (min–max range + daily avg)
-                                        </span>
                                     </h4>
                                     <div id="epwTimeseriesAnnualWrap">
                                         <div id="epwTimeseriesAnnual"></div>
@@ -281,7 +294,6 @@
                                     <h4 class="ts-section-header">Average Daily Profile by Month
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; SVG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; PNG</button>
-                                        <span class="ts-legend-hint">One panel per month &nbsp;|&nbsp; Grey band = all-data min–max &nbsp;|&nbsp; Color band + line = filtered avg &amp; min–max</span>
                                     </h4>
                                     <div id="epwTimeseriesDailyProfile"></div>
                                 </div><!-- /tab-timeseries -->
@@ -296,7 +308,6 @@
                                             <div class="hm-dropdown-menu" id="hmDropdownMenu"></div>
                                         </div>
                                     </div>
-                                    <p id="hmFilterInfo" class="hm-filter-info"></p>
                                     <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
 
@@ -341,10 +352,10 @@
 
                                 <div class="tab-pane fade" id="tab-windrose">
                                     <div id="WindRose">
-                                        <h3>Wind Rose
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
-                                        </h3>
+                                        <div style="margin-bottom:6px;">
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
+                                        </div>
                                         <div id="epwWindRose"></div>
                                     </div>
                                 </div><!-- /tab-windrose -->
@@ -358,7 +369,6 @@
                                     </div>
                                     <div id="epwSunChart"></div>
                                     <div class="chart-title-row" style="margin-top:4px; margin-bottom:4px;">
-                                        <div class="title" style="font-weight:bold; font-size:14px;">Cartesian Sun Path</div>
                                         <div class="chart-download-btns">
                                             <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwSunCartesian','sun-chart-cartesian')">&#8659; SVG</button>
                                             <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwSunCartesian','sun-chart-cartesian')">&#8659; PNG</button>
@@ -369,10 +379,10 @@
 
                                 <div class="tab-pane fade" id="tab-psychro">
                                     <div id="PsychroChart">
-                                        <h3>Psychrometric Chart
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
-                                        </h3>
+                                        <div style="margin-bottom:6px;">
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
+                                        </div>
                                         <div id="epwPsychroChart"></div>
                                     </div>
                                 </div><!-- /tab-psychro -->
@@ -531,6 +541,10 @@
   // ---- User appearance settings ----
   window._plotColor = 'steelblue';
   window._hmScheme  = 'rainbow';
+  window._exportTitle     = true;  // include SVG-embedded chart titles in export
+  window._exportFilter    = true;  // include filter extent labels in export
+  window._exportDataLabel = true;  // include data labels (count/pct) in export
+  window._exportLegend    = true;  // include legends in export
 
   var _settingsPlotColors = [
     { value: 'steelblue', label: 'Steel Blue'    },
@@ -575,6 +589,16 @@
     var swatchWrap = document.getElementById('plotColorSwatches');
     var schemeWrap = document.getElementById('hmSchemeOptions');
     if (!swatchWrap || !schemeWrap) return;
+
+    // Sync export checkboxes with current flag state (panel is rebuilt each open)
+    var cbTitle     = document.getElementById('exportIncludeTitle');
+    var cbFilter    = document.getElementById('exportIncludeFilter');
+    var cbDataLabel = document.getElementById('exportIncludeDataLabel');
+    var cbLegend    = document.getElementById('exportIncludeLegend');
+    if (cbTitle)     cbTitle.checked     = window._exportTitle;
+    if (cbFilter)    cbFilter.checked    = window._exportFilter;
+    if (cbDataLabel) cbDataLabel.checked = window._exportDataLabel;
+    if (cbLegend)    cbLegend.checked    = window._exportLegend;
 
     swatchWrap.innerHTML = '';
     _settingsPlotColors.forEach(function(c) {
@@ -996,6 +1020,19 @@
   }
   parseURI();
 
+  document.getElementById('exportIncludeTitle').addEventListener('change', function() {
+    window._exportTitle = this.checked;
+  });
+  document.getElementById('exportIncludeFilter').addEventListener('change', function() {
+    window._exportFilter = this.checked;
+  });
+  document.getElementById('exportIncludeDataLabel').addEventListener('change', function() {
+    window._exportDataLabel = this.checked;
+  });
+  document.getElementById('exportIncludeLegend').addEventListener('change', function() {
+    window._exportLegend = this.checked;
+  });
+
   fileInput = document.getElementById('fileinput');
 
   fileInput.onchange = function(evt) {
@@ -1129,13 +1166,34 @@
     setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
   }
 
+  // ---- Export helpers: conditionally hide SVG-embedded labels ----
+  // Brush resize handles are always suppressed. Each label category is
+  // independently controlled by its own export flag.
+  function _injectHideLabelStyle(svgEl) {
+    var css = '.brush .resize { display: none; }';
+    if (!window._exportTitle)     css += ' [data-epv-title] { display: none; }';
+    if (!window._exportFilter)    css += ' [data-epv-filter] { display: none; }';
+    if (!window._exportDataLabel) css += ' [data-epv-datalabel] { display: none; }';
+    if (!window._exportLegend)    css += ' [data-epv-legend] { display: none; }';
+    var s = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    s.setAttribute('class', 'epv-hide-labels-style');
+    s.textContent = css;
+    svgEl.insertBefore(s, svgEl.firstChild);
+  }
+  function _removeHideLabelStyle(svgEl) {
+    var s = svgEl.querySelector('style.epv-hide-labels-style');
+    if (s && s.parentNode) s.parentNode.removeChild(s);
+  }
+
   function downloadAllSVG() {
     var charts = collectAllCharts();
     if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
     var zip = new JSZip();
     var serializer = new XMLSerializer();
     charts.forEach(function(c) {
+      _injectHideLabelStyle(c.svgEl);
       var source = serializer.serializeToString(c.svgEl);
+      _removeHideLabelStyle(c.svgEl);
       if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
         source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
       }
@@ -1150,12 +1208,14 @@
   function downloadAllPNG() {
     var charts = collectAllCharts();
     if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
+    charts.forEach(function(c) { _injectHideLabelStyle(c.svgEl); });
     var promises = charts.map(function(c) {
       return svgAsPngUri(c.svgEl, { scale: 2 }).then(function(uri) {
         return { name: c.name, uri: uri };
       });
     });
     Promise.all(promises).then(function(results) {
+      charts.forEach(function(c) { _removeHideLabelStyle(c.svgEl); });
       var zip = new JSZip();
       results.forEach(function(r) {
         var b64 = r.uri.replace(/^data:image\/png;base64,/, '');
@@ -1165,6 +1225,7 @@
     }).then(function(blob) {
       triggerBlobDownload(blob, getZipBasename() + '-png.zip');
     }).catch(function(err) {
+      charts.forEach(function(c) { _removeHideLabelStyle(c.svgEl); });
       alert('PNG export failed: ' + err.message);
     });
   }
@@ -1172,8 +1233,10 @@
   function downloadSVG(containerId, filename) {
     var svgEl = document.querySelector('#' + containerId + ' svg');
     if (!svgEl) { alert("No chart to export. Load an EPW file first."); return; }
+    _injectHideLabelStyle(svgEl);
     var serializer = new XMLSerializer();
     var source = serializer.serializeToString(svgEl);
+    _removeHideLabelStyle(svgEl);
     if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
       source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
     }
@@ -1276,15 +1339,20 @@
       '.background.bar { fill: #ccc; }' +
       '.foreground.bar { fill: ' + _color + '; }' +
       '.brush rect.extent { fill: ' + _color + '; fill-opacity: .125; }' +
+      '.brush .resize { display: none; }' +
       '.legend text { font: 12px sans-serif; }' +
       '.legend-header text { font: 14px sans-serif; }' +
       '.polar-g .pbg, .polar-g .pfg { stroke: white; stroke-width: 0.5px; }';
     svgEl.insertBefore(styleEl, svgEl.firstChild);
+    _injectHideLabelStyle(svgEl);
 
     saveSvgAsPng(svgEl, filename + ".png", { scale: 2 });
 
-    // Remove injected style after SVG has been serialized for export
-    setTimeout(function() { if (svgEl.contains(styleEl)) svgEl.removeChild(styleEl); }, 1000);
+    // Remove injected styles after SVG has been serialized for export
+    setTimeout(function() {
+      if (svgEl.contains(styleEl)) svgEl.removeChild(styleEl);
+      _removeHideLabelStyle(svgEl);
+    }, 1000);
   }
 </script>
 

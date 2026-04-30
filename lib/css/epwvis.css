@@ -161,6 +161,15 @@ header a:hover              { color: black;     text-decoration: underline; }
   margin: 0 0 7px 0;
 }
 .settings-separator { border-top: 1px solid #eee; margin: 11px 0; }
+.settings-export-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 2px;
+}
 .plot-color-swatches { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
 .plot-color-swatch {
   width: 28px; height: 28px;
