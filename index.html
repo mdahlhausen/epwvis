@@ -131,6 +131,10 @@
                                   <input type="checkbox" id="exportIncludeLegend" checked>
                                   Include legends in export
                                 </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportActiveOnly" checked>
+                                  Download All: active filters only
+                                </label>
                               </div>
                             </div>
                             <span style="font-size:15px; color:#555; white-space:nowrap;">Unit System:</span>
@@ -1111,7 +1115,7 @@
   });
 
   // Returns [{svgEl, name}, ...] for every chart currently rendered on the page.
-  function collectAllCharts() {
+  function collectAllCharts(activeOnly) {
     var staticCharts = [
       { id: 'epwTimeseriesAnnual',        name: 'timeseries-annual' },
       { id: 'epwTimeseriesDailyProfile',  name: 'timeseries-daily-profile' },
@@ -1123,40 +1127,43 @@
       { id: 'epwDurationChart',            name: 'duration-curve' },
       { id: 'epwDegreeDaysChart',           name: 'degree-days' },
       { id: 'epwSolarPVChart',              name: 'solar-pv' },
-      { id: 'month-chart',                name: 'month' },
-      { id: 'hour-chart',                 name: 'hour' },
-      { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter' },
-      { id: 'dewpoint-temperature-chart', name: 'dewpoint-temperature-filter' },
-      { id: 'rh-chart',                   name: 'relative-humidity-filter' },
-      { id: 'wetbulb-temperature-chart',  name: 'wetbulb-temperature-filter' },
-      { id: 'enthalpy-chart',             name: 'enthalpy-filter' },
-      { id: 'humidity-ratio-chart',       name: 'humidity-ratio-filter' },
-      { id: 'ghi-chart',                  name: 'ghi-filter' },
-      { id: 'dni-chart',                  name: 'dni-filter' },
-      { id: 'dhi-chart',                  name: 'dhi-filter' },
-      { id: 'wind-speed-chart',              name: 'wind-speed-filter' },
-      { id: 'wind-direction-chart',          name: 'wind-direction-filter' },
-      { id: 'sky-cover-chart',               name: 'sky-cover-filter' },
-      { id: 'opaque-sky-cover-chart',        name: 'opaque-sky-cover-filter' },
-      { id: 'visibility-chart',              name: 'visibility-filter' },
-      { id: 'ceiling-height-chart',          name: 'ceiling-height-filter' },
-      { id: 'precipitable-water-chart',      name: 'precipitable-water-filter' },
-      { id: 'aerosol-optical-depth-chart',   name: 'aerosol-optical-depth-filter' },
-      { id: 'snow-depth-chart',              name: 'snow-depth-filter' },
-      { id: 'days-since-last-snowfall-chart',name: 'days-since-last-snowfall-filter' },
-      { id: 'albedo-chart',                  name: 'albedo-filter' },
-      { id: 'liquid-precip-depth-chart',     name: 'liquid-precip-depth-filter' },
-      { id: 'liquid-precip-qty-chart',       name: 'liquid-precip-qty-filter' },
-      { id: 'pressure-chart',                name: 'pressure-filter' },
-      { id: 'pv-ac-chart',                   name: 'pv-ac-filter' },
-      { id: 'solar-altitude-chart',          name: 'solar-altitude-filter' },
-      { id: 'solar-azimuth-chart',           name: 'solar-azimuth-filter' },
-      { id: 'utci-numeric-chart',            name: 'utci-numeric-filter' },
-      { id: 'utci-chart',                    name: 'utci-filter' }
+      { id: 'month-chart',                name: 'month',                         valueFilter: true },
+      { id: 'hour-chart',                 name: 'hour',                          valueFilter: true },
+      { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter',   valueFilter: true },
+      { id: 'dewpoint-temperature-chart', name: 'dewpoint-temperature-filter',  valueFilter: true },
+      { id: 'rh-chart',                   name: 'relative-humidity-filter',     valueFilter: true },
+      { id: 'wetbulb-temperature-chart',  name: 'wetbulb-temperature-filter',   valueFilter: true },
+      { id: 'enthalpy-chart',             name: 'enthalpy-filter',              valueFilter: true },
+      { id: 'humidity-ratio-chart',       name: 'humidity-ratio-filter',        valueFilter: true },
+      { id: 'ghi-chart',                  name: 'ghi-filter',                   valueFilter: true },
+      { id: 'dni-chart',                  name: 'dni-filter',                   valueFilter: true },
+      { id: 'dhi-chart',                  name: 'dhi-filter',                   valueFilter: true },
+      { id: 'wind-speed-chart',           name: 'wind-speed-filter',            valueFilter: true },
+      { id: 'wind-direction-chart',       name: 'wind-direction-filter',        valueFilter: true },
+      { id: 'sky-cover-chart',            name: 'sky-cover-filter',             valueFilter: true },
+      { id: 'opaque-sky-cover-chart',     name: 'opaque-sky-cover-filter',      valueFilter: true },
+      { id: 'visibility-chart',           name: 'visibility-filter',            valueFilter: true },
+      { id: 'ceiling-height-chart',       name: 'ceiling-height-filter',        valueFilter: true },
+      { id: 'precipitable-water-chart',   name: 'precipitable-water-filter',    valueFilter: true },
+      { id: 'aerosol-optical-depth-chart',name: 'aerosol-optical-depth-filter', valueFilter: true },
+      { id: 'snow-depth-chart',           name: 'snow-depth-filter',            valueFilter: true },
+      { id: 'days-since-last-snowfall-chart', name: 'days-since-last-snowfall-filter', valueFilter: true },
+      { id: 'albedo-chart',               name: 'albedo-filter',                valueFilter: true },
+      { id: 'liquid-precip-depth-chart',  name: 'liquid-precip-depth-filter',   valueFilter: true },
+      { id: 'liquid-precip-qty-chart',    name: 'liquid-precip-qty-filter',     valueFilter: true },
+      { id: 'pressure-chart',             name: 'pressure-filter',              valueFilter: true },
+      { id: 'pv-ac-chart',                name: 'pv-ac-filter',                 valueFilter: true },
+      { id: 'solar-altitude-chart',       name: 'solar-altitude-filter',        valueFilter: true },
+      { id: 'solar-azimuth-chart',        name: 'solar-azimuth-filter',         valueFilter: true },
+      { id: 'utci-numeric-chart',         name: 'utci-numeric-filter',          valueFilter: true },
+      { id: 'utci-chart',                 name: 'utci-filter',                  valueFilter: true }
     ];
     var result = [];
     staticCharts.forEach(function(c) {
-      var el = document.querySelector('#' + c.id + ' svg');
+      var container = document.getElementById(c.id);
+      // When activeOnly, skip value filter charts that are hidden; always include response graphics
+      if (activeOnly && c.valueFilter && container && container.offsetParent === null) return;
+      var el = container ? container.querySelector('svg') : null;
       if (el) result.push({ svgEl: el, name: c.name });
     });
     var hmContainer = document.getElementById('heatmapChartsContainer');
@@ -1204,7 +1211,8 @@
   }
 
   function downloadAllSVG() {
-    var charts = collectAllCharts();
+    var activeOnly = (document.getElementById('exportActiveOnly') || {}).checked !== false;
+    var charts = collectAllCharts(activeOnly);
     if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
     var zip = new JSZip();
     var serializer = new XMLSerializer();
@@ -1224,7 +1232,8 @@
   }
 
   function downloadAllPNG() {
-    var charts = collectAllCharts();
+    var activeOnly = (document.getElementById('exportActiveOnly') || {}).checked !== false;
+    var charts = collectAllCharts(activeOnly);
     if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
     charts.forEach(function(c) { _injectHideLabelStyle(c.svgEl); });
     var promises = charts.map(function(c) {
