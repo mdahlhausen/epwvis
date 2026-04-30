@@ -21,7 +21,7 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.3.0"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.3.0"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.3.1"></script>
 <script type="text/javascript" src="./lib/js/solarPV.js?v=1.1.0"></script>
 <script type="text/javascript" src="./lib/js/utci.js"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
@@ -113,6 +113,28 @@
                                 <div class="settings-separator"></div>
                                 <div class="settings-section-label">Heatmap Color Scheme</div>
                                 <div class="hm-scheme-options" id="hmSchemeOptions"></div>
+                                <div class="settings-separator"></div>
+                                <div class="settings-section-label">Export</div>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeTitle" checked>
+                                  Include chart titles in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeFilter" checked>
+                                  Include filter extents in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeDataLabel" checked>
+                                  Include data labels in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportIncludeLegend" checked>
+                                  Include legends in export
+                                </label>
+                                <label class="settings-export-label">
+                                  <input type="checkbox" id="exportActiveOnly" checked>
+                                  Download All: active filters only
+                                </label>
                               </div>
                             </div>
                             <span style="font-size:15px; color:#555; white-space:nowrap;">Unit System:</span>
@@ -269,11 +291,6 @@
                                     <h4 class="ts-section-header">Annual Timeseries
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesAnnual','timeseries-annual')">&#8659; SVG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesAnnual','timeseries-annual')">&#8659; PNG</button>
-                                        <span class="ts-legend-hint">
-                                            <span class="ts-swatch ts-swatch-grey"></span>All data (min–max range + daily avg)
-                                            &nbsp;
-                                            <span class="ts-swatch ts-swatch-blue"></span>Filtered data (min–max range + daily avg)
-                                        </span>
                                     </h4>
                                     <div id="epwTimeseriesAnnualWrap">
                                         <div id="epwTimeseriesAnnual"></div>
@@ -281,7 +298,6 @@
                                     <h4 class="ts-section-header">Average Daily Profile by Month
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; SVG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwTimeseriesDailyProfile','timeseries-daily-profile')">&#8659; PNG</button>
-                                        <span class="ts-legend-hint">One panel per month &nbsp;|&nbsp; Grey band = all-data min–max &nbsp;|&nbsp; Color band + line = filtered avg &amp; min–max</span>
                                     </h4>
                                     <div id="epwTimeseriesDailyProfile"></div>
                                 </div><!-- /tab-timeseries -->
@@ -296,7 +312,6 @@
                                             <div class="hm-dropdown-menu" id="hmDropdownMenu"></div>
                                         </div>
                                     </div>
-                                    <p id="hmFilterInfo" class="hm-filter-info"></p>
                                     <div id="heatmapChartsContainer"></div>
                                 </div><!-- /tab-heatmaps -->
 
@@ -341,10 +356,10 @@
 
                                 <div class="tab-pane fade" id="tab-windrose">
                                     <div id="WindRose">
-                                        <h3>Wind Rose
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
-                                        </h3>
+                                        <div style="margin-bottom:6px;">
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwWindRose','wind-rose')">&#8659; SVG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwWindRose','wind-rose')">&#8659; PNG</button>
+                                        </div>
                                         <div id="epwWindRose"></div>
                                     </div>
                                 </div><!-- /tab-windrose -->
@@ -358,7 +373,6 @@
                                     </div>
                                     <div id="epwSunChart"></div>
                                     <div class="chart-title-row" style="margin-top:4px; margin-bottom:4px;">
-                                        <div class="title" style="font-weight:bold; font-size:14px;">Cartesian Sun Path</div>
                                         <div class="chart-download-btns">
                                             <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwSunCartesian','sun-chart-cartesian')">&#8659; SVG</button>
                                             <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwSunCartesian','sun-chart-cartesian')">&#8659; PNG</button>
@@ -369,10 +383,10 @@
 
                                 <div class="tab-pane fade" id="tab-psychro">
                                     <div id="PsychroChart">
-                                        <h3>Psychrometric Chart
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle; margin-left:8px;" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
-                                          <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
-                                        </h3>
+                                        <div style="margin-bottom:6px;">
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadSVG('epwPsychroChart','psychrometric-chart')">&#8659; SVG</button>
+                                          <button class="btn btn-outline-secondary btn-sm" onclick="downloadPNG('epwPsychroChart','psychrometric-chart')">&#8659; PNG</button>
+                                        </div>
                                         <div id="epwPsychroChart"></div>
                                     </div>
                                 </div><!-- /tab-psychro -->
@@ -385,11 +399,13 @@
                                         <label class="dd-base-label" style="margin-left:14px;">Cooling base:</label>
                                         <input id="ddCoolBase" type="number" class="form-control dd-base-input" value="65" step="1">
                                         <span id="ddCoolUnit" class="dd-base-label">&deg;F</span>
-                                        <button class="btn btn-outline-secondary btn-sm" style="margin-left:14px; vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
+                                    </div>
+                                    <div id="ddTotals" class="dd-totals"></div>
+                                    <div style="margin-top:6px;">
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysChart','degree-days')">&#8659; SVG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysChart','degree-days')">&#8659; PNG</button>
                                         <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadDDCSV()">&#8659; CSV</button>
                                     </div>
-                                    <div id="ddTotals" class="dd-totals"></div>
                                     <div class="dd-legend">
                                         <span><span class="dd-swatch" style="background:#c0392b;"></span>Heating DD (filtered)</span>
                                         <span><span class="dd-swatch" style="background:#e8a9a0;"></span>Heating DD (all data)</span>
@@ -397,6 +413,22 @@
                                         <span><span class="dd-swatch" style="background:#a0c4e8;"></span>Cooling DD (all data)</span>
                                     </div>
                                     <div id="epwDegreeDaysChart"></div>
+                                    <div id="ddByTempTotals" class="dd-totals"></div>
+                                    <div style="margin-top:6px;">
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadSVG('epwDegreeDaysByTempChart','degree-days-by-temp')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('epwDegreeDaysByTempChart','degree-days-by-temp')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadDDByTempCSV()">&#8659; CSV</button>
+                                    </div>
+                                    <div id="epwDegreeDaysByTempChart"></div>
+
+                                    <div class="pv-attribution">
+                                        <h5>Terminology</h5>
+                                        <b>Degree Days</b> — a measure of how much, and for how long, the outdoor temperature deviates from a base (balance point) temperature. Each hour that the dry-bulb temperature is below the heating base contributes <em>(base &minus; T<sub>drybulb</sub>) &divide; 24</em> heating degree-days (HDD); each hour above the cooling base contributes <em>(T<sub>drybulb</sub> &minus; base) &divide; 24</em> cooling degree-days (CDD). Annual totals are used to estimate heating and cooling energy consumption.
+                                        <br><br>
+                                        <b>Balance Point Temperature</b> — the outdoor temperature at which a building neither needs heating nor cooling. It depends on internal heat gains (occupants, lighting, equipment), solar gains, and how well-insulated the envelope is. A lower balance point means the building retains heat well and needs heating only in colder conditions.
+                                        <br><br>
+                                        More efficient buildings may have lower heating bases (internal gains and solar gains keep the building warm longer without mechanical heating) depending on climate zone.
+                                    </div>
                                 </div><!-- /tab-degreedays -->
 
                                 <div class="tab-pane fade" id="tab-solarpv">
@@ -531,6 +563,10 @@
   // ---- User appearance settings ----
   window._plotColor = 'steelblue';
   window._hmScheme  = 'rainbow';
+  window._exportTitle     = true;  // include SVG-embedded chart titles in export
+  window._exportFilter    = true;  // include filter extent labels in export
+  window._exportDataLabel = true;  // include data labels (count/pct) in export
+  window._exportLegend    = true;  // include legends in export
 
   var _settingsPlotColors = [
     { value: 'steelblue', label: 'Steel Blue'    },
@@ -575,6 +611,16 @@
     var swatchWrap = document.getElementById('plotColorSwatches');
     var schemeWrap = document.getElementById('hmSchemeOptions');
     if (!swatchWrap || !schemeWrap) return;
+
+    // Sync export checkboxes with current flag state (panel is rebuilt each open)
+    var cbTitle     = document.getElementById('exportIncludeTitle');
+    var cbFilter    = document.getElementById('exportIncludeFilter');
+    var cbDataLabel = document.getElementById('exportIncludeDataLabel');
+    var cbLegend    = document.getElementById('exportIncludeLegend');
+    if (cbTitle)     cbTitle.checked     = window._exportTitle;
+    if (cbFilter)    cbFilter.checked    = window._exportFilter;
+    if (cbDataLabel) cbDataLabel.checked = window._exportDataLabel;
+    if (cbLegend)    cbLegend.checked    = window._exportLegend;
 
     swatchWrap.innerHTML = '';
     _settingsPlotColors.forEach(function(c) {
@@ -996,6 +1042,19 @@
   }
   parseURI();
 
+  document.getElementById('exportIncludeTitle').addEventListener('change', function() {
+    window._exportTitle = this.checked;
+  });
+  document.getElementById('exportIncludeFilter').addEventListener('change', function() {
+    window._exportFilter = this.checked;
+  });
+  document.getElementById('exportIncludeDataLabel').addEventListener('change', function() {
+    window._exportDataLabel = this.checked;
+  });
+  document.getElementById('exportIncludeLegend').addEventListener('change', function() {
+    window._exportLegend = this.checked;
+  });
+
   fileInput = document.getElementById('fileinput');
 
   fileInput.onchange = function(evt) {
@@ -1056,7 +1115,7 @@
   });
 
   // Returns [{svgEl, name}, ...] for every chart currently rendered on the page.
-  function collectAllCharts() {
+  function collectAllCharts(activeOnly) {
     var staticCharts = [
       { id: 'epwTimeseriesAnnual',        name: 'timeseries-annual' },
       { id: 'epwTimeseriesDailyProfile',  name: 'timeseries-daily-profile' },
@@ -1068,40 +1127,43 @@
       { id: 'epwDurationChart',            name: 'duration-curve' },
       { id: 'epwDegreeDaysChart',           name: 'degree-days' },
       { id: 'epwSolarPVChart',              name: 'solar-pv' },
-      { id: 'month-chart',                name: 'month' },
-      { id: 'hour-chart',                 name: 'hour' },
-      { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter' },
-      { id: 'dewpoint-temperature-chart', name: 'dewpoint-temperature-filter' },
-      { id: 'rh-chart',                   name: 'relative-humidity-filter' },
-      { id: 'wetbulb-temperature-chart',  name: 'wetbulb-temperature-filter' },
-      { id: 'enthalpy-chart',             name: 'enthalpy-filter' },
-      { id: 'humidity-ratio-chart',       name: 'humidity-ratio-filter' },
-      { id: 'ghi-chart',                  name: 'ghi-filter' },
-      { id: 'dni-chart',                  name: 'dni-filter' },
-      { id: 'dhi-chart',                  name: 'dhi-filter' },
-      { id: 'wind-speed-chart',              name: 'wind-speed-filter' },
-      { id: 'wind-direction-chart',          name: 'wind-direction-filter' },
-      { id: 'sky-cover-chart',               name: 'sky-cover-filter' },
-      { id: 'opaque-sky-cover-chart',        name: 'opaque-sky-cover-filter' },
-      { id: 'visibility-chart',              name: 'visibility-filter' },
-      { id: 'ceiling-height-chart',          name: 'ceiling-height-filter' },
-      { id: 'precipitable-water-chart',      name: 'precipitable-water-filter' },
-      { id: 'aerosol-optical-depth-chart',   name: 'aerosol-optical-depth-filter' },
-      { id: 'snow-depth-chart',              name: 'snow-depth-filter' },
-      { id: 'days-since-last-snowfall-chart',name: 'days-since-last-snowfall-filter' },
-      { id: 'albedo-chart',                  name: 'albedo-filter' },
-      { id: 'liquid-precip-depth-chart',     name: 'liquid-precip-depth-filter' },
-      { id: 'liquid-precip-qty-chart',       name: 'liquid-precip-qty-filter' },
-      { id: 'pressure-chart',                name: 'pressure-filter' },
-      { id: 'pv-ac-chart',                   name: 'pv-ac-filter' },
-      { id: 'solar-altitude-chart',          name: 'solar-altitude-filter' },
-      { id: 'solar-azimuth-chart',           name: 'solar-azimuth-filter' },
-      { id: 'utci-numeric-chart',            name: 'utci-numeric-filter' },
-      { id: 'utci-chart',                    name: 'utci-filter' }
+      { id: 'month-chart',                name: 'month',                         valueFilter: true },
+      { id: 'hour-chart',                 name: 'hour',                          valueFilter: true },
+      { id: 'drybulb-temperature-chart',  name: 'drybulb-temperature-filter',   valueFilter: true },
+      { id: 'dewpoint-temperature-chart', name: 'dewpoint-temperature-filter',  valueFilter: true },
+      { id: 'rh-chart',                   name: 'relative-humidity-filter',     valueFilter: true },
+      { id: 'wetbulb-temperature-chart',  name: 'wetbulb-temperature-filter',   valueFilter: true },
+      { id: 'enthalpy-chart',             name: 'enthalpy-filter',              valueFilter: true },
+      { id: 'humidity-ratio-chart',       name: 'humidity-ratio-filter',        valueFilter: true },
+      { id: 'ghi-chart',                  name: 'ghi-filter',                   valueFilter: true },
+      { id: 'dni-chart',                  name: 'dni-filter',                   valueFilter: true },
+      { id: 'dhi-chart',                  name: 'dhi-filter',                   valueFilter: true },
+      { id: 'wind-speed-chart',           name: 'wind-speed-filter',            valueFilter: true },
+      { id: 'wind-direction-chart',       name: 'wind-direction-filter',        valueFilter: true },
+      { id: 'sky-cover-chart',            name: 'sky-cover-filter',             valueFilter: true },
+      { id: 'opaque-sky-cover-chart',     name: 'opaque-sky-cover-filter',      valueFilter: true },
+      { id: 'visibility-chart',           name: 'visibility-filter',            valueFilter: true },
+      { id: 'ceiling-height-chart',       name: 'ceiling-height-filter',        valueFilter: true },
+      { id: 'precipitable-water-chart',   name: 'precipitable-water-filter',    valueFilter: true },
+      { id: 'aerosol-optical-depth-chart',name: 'aerosol-optical-depth-filter', valueFilter: true },
+      { id: 'snow-depth-chart',           name: 'snow-depth-filter',            valueFilter: true },
+      { id: 'days-since-last-snowfall-chart', name: 'days-since-last-snowfall-filter', valueFilter: true },
+      { id: 'albedo-chart',               name: 'albedo-filter',                valueFilter: true },
+      { id: 'liquid-precip-depth-chart',  name: 'liquid-precip-depth-filter',   valueFilter: true },
+      { id: 'liquid-precip-qty-chart',    name: 'liquid-precip-qty-filter',     valueFilter: true },
+      { id: 'pressure-chart',             name: 'pressure-filter',              valueFilter: true },
+      { id: 'pv-ac-chart',                name: 'pv-ac-filter',                 valueFilter: true },
+      { id: 'solar-altitude-chart',       name: 'solar-altitude-filter',        valueFilter: true },
+      { id: 'solar-azimuth-chart',        name: 'solar-azimuth-filter',         valueFilter: true },
+      { id: 'utci-numeric-chart',         name: 'utci-numeric-filter',          valueFilter: true },
+      { id: 'utci-chart',                 name: 'utci-filter',                  valueFilter: true }
     ];
     var result = [];
     staticCharts.forEach(function(c) {
-      var el = document.querySelector('#' + c.id + ' svg');
+      var container = document.getElementById(c.id);
+      // When activeOnly, skip value filter charts that are hidden; always include response graphics
+      if (activeOnly && c.valueFilter && container && container.offsetParent === null) return;
+      var el = container ? container.querySelector('svg') : null;
       if (el) result.push({ svgEl: el, name: c.name });
     });
     var hmContainer = document.getElementById('heatmapChartsContainer');
@@ -1129,13 +1191,35 @@
     setTimeout(function() { URL.revokeObjectURL(url); }, 5000);
   }
 
+  // ---- Export helpers: conditionally hide SVG-embedded labels ----
+  // Brush resize handles are always suppressed. Each label category is
+  // independently controlled by its own export flag.
+  function _injectHideLabelStyle(svgEl) {
+    var css = '.brush .resize { display: none; }';
+    if (!window._exportTitle)     css += ' [data-epv-title] { display: none; }';
+    if (!window._exportFilter)    css += ' [data-epv-filter] { display: none; }';
+    if (!window._exportDataLabel) css += ' [data-epv-datalabel] { display: none; }';
+    if (!window._exportLegend)    css += ' [data-epv-legend] { display: none; }';
+    var s = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    s.setAttribute('class', 'epv-hide-labels-style');
+    s.textContent = css;
+    svgEl.insertBefore(s, svgEl.firstChild);
+  }
+  function _removeHideLabelStyle(svgEl) {
+    var s = svgEl.querySelector('style.epv-hide-labels-style');
+    if (s && s.parentNode) s.parentNode.removeChild(s);
+  }
+
   function downloadAllSVG() {
-    var charts = collectAllCharts();
+    var activeOnly = (document.getElementById('exportActiveOnly') || {}).checked !== false;
+    var charts = collectAllCharts(activeOnly);
     if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
     var zip = new JSZip();
     var serializer = new XMLSerializer();
     charts.forEach(function(c) {
+      _injectHideLabelStyle(c.svgEl);
       var source = serializer.serializeToString(c.svgEl);
+      _removeHideLabelStyle(c.svgEl);
       if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
         source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
       }
@@ -1148,14 +1232,17 @@
   }
 
   function downloadAllPNG() {
-    var charts = collectAllCharts();
+    var activeOnly = (document.getElementById('exportActiveOnly') || {}).checked !== false;
+    var charts = collectAllCharts(activeOnly);
     if (!charts.length) { alert('No charts to export. Load an EPW file first.'); return; }
+    charts.forEach(function(c) { _injectHideLabelStyle(c.svgEl); });
     var promises = charts.map(function(c) {
       return svgAsPngUri(c.svgEl, { scale: 2 }).then(function(uri) {
         return { name: c.name, uri: uri };
       });
     });
     Promise.all(promises).then(function(results) {
+      charts.forEach(function(c) { _removeHideLabelStyle(c.svgEl); });
       var zip = new JSZip();
       results.forEach(function(r) {
         var b64 = r.uri.replace(/^data:image\/png;base64,/, '');
@@ -1165,6 +1252,7 @@
     }).then(function(blob) {
       triggerBlobDownload(blob, getZipBasename() + '-png.zip');
     }).catch(function(err) {
+      charts.forEach(function(c) { _removeHideLabelStyle(c.svgEl); });
       alert('PNG export failed: ' + err.message);
     });
   }
@@ -1172,8 +1260,10 @@
   function downloadSVG(containerId, filename) {
     var svgEl = document.querySelector('#' + containerId + ' svg');
     if (!svgEl) { alert("No chart to export. Load an EPW file first."); return; }
+    _injectHideLabelStyle(svgEl);
     var serializer = new XMLSerializer();
     var source = serializer.serializeToString(svgEl);
+    _removeHideLabelStyle(svgEl);
     if (!source.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)) {
       source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
     }
@@ -1261,6 +1351,62 @@
     triggerBlobDownload(blob, 'degree-days.csv');
   }
 
+  function downloadDDByTempCSV() {
+    var allData = window._tsAllData;
+    if (!allData || !allData.length) { alert('No data to export. Load an EPW file first.'); return; }
+    var activeData = window._ddLastActive || allData;
+    var isIP = (unitSystem === 'IP');
+    var defaultBase = isIP ? 65 : 18;
+    var hBase = window._ddHeatBase || defaultBase;
+    var cBase = window._ddCoolBase || defaultBase;
+    var uLabel = isIP ? 'F' : 'C';
+    var binSize = isIP ? 5 : 2;
+
+    var allTemps = allData.map(function(d) { return d.dryBulbTemperature; });
+    var tMin = Math.floor(d3.min(allTemps) / binSize) * binSize;
+    var tMax = Math.ceil(d3.max(allTemps)  / binSize) * binSize;
+    var bins = [];
+    for (var t = tMin; t < tMax; t += binSize) { bins.push(t); }
+
+    function accumBins(data) {
+      var hdd = {}, cdd = {};
+      bins.forEach(function(b) { hdd[b] = 0; cdd[b] = 0; });
+      data.forEach(function(d) {
+        var db  = d.dryBulbTemperature;
+        var bin = Math.floor(db / binSize) * binSize;
+        if (hdd[bin] === undefined) return;
+        hdd[bin] += Math.max(0, hBase - db) / 24;
+        cdd[bin] += Math.max(0, db - cBase) / 24;
+      });
+      return { hdd: hdd, cdd: cdd };
+    }
+
+    var allBins    = accumBins(allData);
+    var activeBins = accumBins(activeData);
+
+    var rows = [
+      'Bin Low (' + uLabel + '),' +
+      'Bin High (' + uLabel + '),' +
+      'HDD Filtered (base ' + hBase + '\u00b0' + uLabel + '),' +
+      'CDD Filtered (base ' + cBase + '\u00b0' + uLabel + '),' +
+      'HDD All Data (base ' + hBase + '\u00b0' + uLabel + '),' +
+      'CDD All Data (base ' + cBase + '\u00b0' + uLabel + ')'
+    ];
+    bins.forEach(function(b) {
+      rows.push([
+        b,
+        b + binSize,
+        (activeBins.hdd[b] || 0).toFixed(4),
+        (activeBins.cdd[b] || 0).toFixed(4),
+        (allBins.hdd[b]    || 0).toFixed(4),
+        (allBins.cdd[b]    || 0).toFixed(4)
+      ].join(','));
+    });
+
+    var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, 'degree-days-by-temp.csv');
+  }
+
   function downloadPNG(containerId, filename) {
     var svgEl = document.querySelector('#' + containerId + ' svg');
     if (!svgEl) { alert("No chart to export. Load an EPW file first."); return; }
@@ -1276,15 +1422,20 @@
       '.background.bar { fill: #ccc; }' +
       '.foreground.bar { fill: ' + _color + '; }' +
       '.brush rect.extent { fill: ' + _color + '; fill-opacity: .125; }' +
+      '.brush .resize { display: none; }' +
       '.legend text { font: 12px sans-serif; }' +
       '.legend-header text { font: 14px sans-serif; }' +
       '.polar-g .pbg, .polar-g .pfg { stroke: white; stroke-width: 0.5px; }';
     svgEl.insertBefore(styleEl, svgEl.firstChild);
+    _injectHideLabelStyle(svgEl);
 
     saveSvgAsPng(svgEl, filename + ".png", { scale: 2 });
 
-    // Remove injected style after SVG has been serialized for export
-    setTimeout(function() { if (svgEl.contains(styleEl)) svgEl.removeChild(styleEl); }, 1000);
+    // Remove injected styles after SVG has been serialized for export
+    setTimeout(function() {
+      if (svgEl.contains(styleEl)) svgEl.removeChild(styleEl);
+      _removeHideLabelStyle(svgEl);
+    }, 1000);
   }
 </script>
 
