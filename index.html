@@ -45,6 +45,7 @@
                 </span>
               </h3>
               <p style="font-size:12px; color:#888; margin:0 0 4px 0;">Source code is available under an MIT license on <a href="https://github.com/mdahlhausen/epwvis" rel="link">Github</a>.  Please provide <a href="https://github.com/mdahlhausen/epwvis/issues" rel="link">feedback, report issues, and request graphs you would like to see here</a>.</p>
+              <p style="font-size:11px; color:#aaa; margin:0 0 2px 0;"><b>To cite:</b> Dahlhausen, M. <i>epwvis: An online viewer and analysis tool for EnergyPlus Weather (EPW) files</i> (2026). Available at: <a href="https://github.com/mdahlhausen/epwvis" style="color:#aaa;" target="_blank">https://github.com/mdahlhausen/epwvis</a></p>
               </span>
           </div>
         </div>
@@ -1721,20 +1722,40 @@
 
     // Summary stats
     if (summaryEl) {
+      var base_comfort  = caseCounts[0][6];
       var base_noStress = caseCounts[0][5];
       var html = '<table class="otc-summary-table">';
+      html += '<tr>' +
+        '<td></td>' +
+        '<td colspan="3" style="font-size:11px;font-weight:bold;color:#00aa44;padding-bottom:3px;">Thermal Comfort Zone (18\u201326\u00b0C)</td>' +
+        '<td style="width:16px;"></td>' +
+        '<td colspan="3" style="font-size:11px;font-weight:bold;color:#00c880;padding-bottom:3px;">No Thermal Stress (9\u201318\u00b0C)</td>' +
+      '</tr>';
       _otcCases.forEach(function(c, ci) {
-        var counts = caseCounts[ci];
-        var total  = 0; for (var n = 0; n < counts.length; n++) total += counts[n];
+        var counts   = caseCounts[ci];
+        var total    = 0; for (var n = 0; n < counts.length; n++) total += counts[n];
+        var comfort  = counts[6];
         var noStress = counts[5];
-        var pct = total > 0 ? (noStress / total * 100).toFixed(1) : '0.0';
+        var comfortPct  = total > 0 ? (comfort  / total * 100).toFixed(1) : '0.0';
+        var noStressPct = total > 0 ? (noStress / total * 100).toFixed(1) : '0.0';
         html += '<tr>' +
           '<td class="otc-stat-label"><b>' + c.label + (c.desc ? ' \u2014 ' + c.desc : '') + '</b></td>' +
-          '<td class="otc-stat-value">' + noStress.toLocaleString() + '</td>' +
-          '<td class="otc-stat-pct">hrs No Thermal Stress (' + pct + '%)</td>';
+          '<td class="otc-stat-value">' + comfort.toLocaleString() + '</td>' +
+          '<td class="otc-stat-pct">hrs (' + comfortPct + '%)</td>';
         if (ci > 0) {
-          var gain = noStress - base_noStress, sign = gain >= 0 ? '+' : '';
-          html += '<td class="' + (gain >= 0 ? 'otc-gain-pos' : 'otc-gain-neg') + '">' + sign + gain.toLocaleString() + ' vs Baseline</td>';
+          var cGain = comfort - base_comfort, cSign = cGain >= 0 ? '+' : '';
+          html += '<td class="' + (cGain >= 0 ? 'otc-gain-pos' : 'otc-gain-neg') + '">' + cSign + cGain.toLocaleString() + ' vs Baseline</td>';
+        } else {
+          html += '<td></td>';
+        }
+        html += '<td></td>' +
+          '<td class="otc-stat-value">' + noStress.toLocaleString() + '</td>' +
+          '<td class="otc-stat-pct">hrs (' + noStressPct + '%)</td>';
+        if (ci > 0) {
+          var nGain = noStress - base_noStress, nSign = nGain >= 0 ? '+' : '';
+          html += '<td class="' + (nGain >= 0 ? 'otc-gain-pos' : 'otc-gain-neg') + '">' + nSign + nGain.toLocaleString() + ' vs Baseline</td>';
+        } else {
+          html += '<td></td>';
         }
         html += '</tr>';
       });
