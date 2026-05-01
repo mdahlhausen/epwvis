@@ -710,3 +710,78 @@ header a:hover              { color: black;     text-decoration: underline; }
 .pv-chart-wrap { display: inline-block; }
 .pv-chart-overlay-btns { text-align: right; margin-bottom: 4px; width: 100%; }
 .pv-chart-overlay-btns .btn { margin-left: 3px; }
+
+/* ---- Outdoor Thermal Comfort Strategies tab ---- */
+.otc-cases-wrap {
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+.otc-cases-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.otc-cases-table th,
+.otc-cases-table td {
+  padding: 8px 10px;
+  border: 1px solid #dee2e6;
+  vertical-align: middle;
+}
+.otc-cases-table thead th {
+  background: #f0f4f8;
+  font-weight: bold;
+  color: #333;
+  white-space: nowrap;
+}
+.otc-th-case   { width: 120px; }
+.otc-th-active { width: 80px; text-align: center; }
+.otc-th-sub {
+  display: block;
+  font-weight: normal;
+  font-size: 11px;
+  color: #888;
+  margin-top: 2px;
+}
+.otc-case-row td { background: #fff; }
+.otc-case-fixed td { background: #f8f9fa; }
+.otc-case-tag {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+}
+.otc-fixed-cell {
+  color: #555;
+  font-size: 12px;
+}
+.otc-radio-cell { text-align: center; }
+.otc-radio-cell label { margin: 0; cursor: pointer; }
+.otc-select { font-size: 12px; padding: 2px 4px; height: auto; }
+.otc-summary-panel { margin: 6px 0 14px 0; }
+.otc-summary-table { border-collapse: separate; border-spacing: 0; }
+.otc-summary-table td { padding: 3px 14px 3px 0; font-size: 13px; }
+.otc-stat-label { color: #333; }
+.otc-stat-value { font-weight: bold; text-align: right; min-width: 62px; }
+.otc-stat-pct   { color: #666; }
+.otc-gain-pos   { color: #2a7a2a; font-weight: bold; }
+.otc-gain-neg   { color: #c0392b; font-weight: bold; }
+.otc-chart-wrap { margin: 4px 0 10px 0; }
+.otc-methodology {
+  margin-top: 22px;
+  padding: 14px 18px;
+  background: #f7f7f7;
+  border-left: 3px solid #bbb;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.7;
+}
+.otc-methodology h5 {
+  margin: 12px 0 6px 0;
+  font-size: 13px;
+  font-weight: bold;
+  color: #444;
+}
+.otc-methodology h5:first-child { margin-top: 0; }
+.otc-methodology ul, .otc-methodology ol { margin: 6px 0; padding-left: 22px; }
+.otc-methodology li { margin-bottom: 4px; }
+.otc-no-data { color: #888; padding: 20px 0; font-style: italic; font-size: 14px; }
