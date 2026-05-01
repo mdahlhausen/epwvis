@@ -6,7 +6,7 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.1.0" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.2.0" type="text/css"/>
 
 <!-- Dynamic color overrides (updated by settings panel JS) -->
 <style id="epv-dyn-colors">
@@ -21,7 +21,7 @@
 <script type="text/javascript" src="./lib/js/crossfilter/crossfilter.min.js"></script>
 <script type="text/javascript" src="./lib/js/psychrolib.js"></script>
 <script type="text/javascript" src="./lib/js/epw2json.js?v=1.3.0"></script>
-<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.4.0"></script>
+<script type="text/javascript" src="./lib/js/epwCharts.js?v=1.5.0"></script>
 <script type="text/javascript" src="./lib/js/solarPV.js?v=1.1.0"></script>
 <script type="text/javascript" src="./lib/js/utci.js"></script>
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
@@ -548,43 +548,43 @@
                                             <thead>
                                                 <tr>
                                                     <th class="otc-th-case">Case</th>
-                                                    <th>Shading <span class="otc-th-sub">Reduce direct solar radiation</span></th>
-                                                    <th>Wind Block <span class="otc-th-sub">Reduce ambient wind speed</span></th>
-                                                    <th>Added Wind (Fans) <span class="otc-th-sub">Supplement airflow</span></th>
-                                                    <th class="otc-th-active">Active Case<br>for UTCI Variables</th>
+                                                    <th class="otc-th-strategy">Shading <span class="otc-th-sub">Reduce direct solar radiation</span></th>
+                                                    <th class="otc-th-strategy">Wind Block <span class="otc-th-sub">Reduce ambient wind speed</span></th>
+                                                    <th class="otc-th-strategy">Added Wind (Fans) <span class="otc-th-sub">Supplement airflow</span></th>
+                                                    <th class="otc-th-active">Active Case<br>for UTCI Variable</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 <tr class="otc-case-row otc-case-fixed">
-                                                    <td><b>Case 1</b><br><em class="otc-case-tag">Baseline</em></td>
+                                                    <td><b>Baseline Case</b></td>
                                                     <td class="otc-fixed-cell">No Shading</td>
                                                     <td class="otc-fixed-cell">No Wind Block</td>
                                                     <td class="otc-fixed-cell">No Added Wind</td>
                                                     <td class="otc-radio-cell"><label><input type="radio" name="otcFilterCase" value="0" checked></label></td>
                                                 </tr>
                                                 <tr class="otc-case-row">
-                                                    <td><b>Case 2</b></td>
+                                                    <td><input type="text" id="otcCaseName1" class="form-control form-control-sm otc-case-name-input" value="Case 2 Shading"></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcShade1"></select></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcBlock1"></select></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcFans1"></select></td>
                                                     <td class="otc-radio-cell"><label><input type="radio" name="otcFilterCase" value="1"></label></td>
                                                 </tr>
                                                 <tr class="otc-case-row">
-                                                    <td><b>Case 3</b></td>
+                                                    <td><input type="text" id="otcCaseName2" class="form-control form-control-sm otc-case-name-input" value="Case 3 Wind Block"></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcShade2"></select></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcBlock2"></select></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcFans2"></select></td>
                                                     <td class="otc-radio-cell"><label><input type="radio" name="otcFilterCase" value="2"></label></td>
                                                 </tr>
                                                 <tr class="otc-case-row">
-                                                    <td><b>Case 4</b></td>
+                                                    <td><input type="text" id="otcCaseName3" class="form-control form-control-sm otc-case-name-input" value="Case 4 All Strategies"></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcShade3"></select></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcBlock3"></select></td>
                                                     <td><select class="form-control form-control-sm otc-select" id="otcFans3"></select></td>
                                                     <td class="otc-radio-cell"><label><input type="radio" name="otcFilterCase" value="3"></label></td>
                                                 </tr>
                                                 <tr class="otc-case-row otc-case-fixed">
-                                                    <td><b>Case 5</b><br><em class="otc-case-tag">All Ideal</em></td>
+                                                    <td><b>Ideal Case</b></td>
                                                     <td class="otc-fixed-cell">Ideal Shading</td>
                                                     <td class="otc-fixed-cell">Ideal Wind Block</td>
                                                     <td class="otc-fixed-cell">High Fans</td>
@@ -595,6 +595,11 @@
                                     </div>
 
                                     <div id="otcSummaryPanel" class="otc-summary-panel"></div>
+                                    <div style="margin-bottom:6px;">
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadSVG('otcMonthlyChart','utci-stress-categories')">&#8659; SVG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadPNG('otcMonthlyChart','utci-stress-categories')">&#8659; PNG</button>
+                                        <button class="btn btn-outline-secondary btn-sm" style="vertical-align:middle;" onclick="downloadOTCCSV()">&#8659; CSV</button>
+                                    </div>
                                     <div id="otcMonthlyChart" class="otc-chart-wrap"></div>
 
                                     <div class="otc-methodology">
@@ -626,7 +631,7 @@
                                             <li><b>Fans — High (+0.8 m/s):</b> Produces a noticeable draft and noise; loose paper and napkins will blow around. Above this level is not recommended without occupant control. Applied only in hours where it improves comfort.</li>
                                         </ul>
                                         <h5>Chart &amp; Filters</h5>
-                                        <p>Each bar shows the distribution of UTCI stress categories for the hours in the current crossfilter selection. Selecting a case as "Active Case for UTCI Variables" overrides the UTCI values in the left-sidebar value filter charts, enabling filtering by strategy-adjusted UTCI.</p>
+                                        <p>Each bar shows the distribution of UTCI stress categories for the hours in the current crossfilter selection. Selecting a case as "Active Case for UTCI Variable" overrides the UTCI values in the left-sidebar value filter charts, enabling filtering by strategy-adjusted UTCI.</p>
                                         <h5>References</h5>
                                         <ol>
                                             <li>Br&ouml;de, P., Fiala, D., B&#322;a&#380;ejczyk, K., Holm&eacute;r, I., Jendritzky, G., Kampmann, B., Tinz, B., &amp; Havenith, G. (2012). Deriving the operational procedure for the Universal Thermal Climate Index (UTCI). <em>International Journal of Biometeorology</em>, 56, 481–494. <a href="https://doi.org/10.1007/s00484-011-0454-1" target="_blank">doi:10.1007/s00484-011-0454-1</a></li>
@@ -1511,11 +1516,11 @@
   // === 5 CASES CONFIGURATION ===
   // Cases 0 and 4 are fixed; cases 1–3 are user-configurable via dropdowns.
   var _otcCases = [
-    { label: 'Case 1', desc: 'Baseline',   fixed: true,  shade: 'none',     block: 'none',     fans: 'none'  },
-    { label: 'Case 2', desc: '',           fixed: false, shade: 'full-var', block: 'none',     fans: 'none'  },
-    { label: 'Case 3', desc: '',           fixed: false, shade: 'none',     block: 'full-var', fans: 'none'  },
-    { label: 'Case 4', desc: '',           fixed: false, shade: 'full-var', block: 'full-var', fans: 'low'   },
-    { label: 'Case 5', desc: 'All Ideal',  fixed: true,  shade: 'ideal',    block: 'ideal',    fans: 'high'  }
+    { label: 'Base Case',            desc: '', fixed: true,  shade: 'none',     block: 'none',     fans: 'none'  },
+    { label: 'Case 2 Shading',       desc: '', fixed: false, shade: 'full-var', block: 'none',     fans: 'none'  },
+    { label: 'Case 3 Wind Block',    desc: '', fixed: false, shade: 'none',     block: 'full-var', fans: 'none'  },
+    { label: 'Case 4 All Strategies',desc: '', fixed: false, shade: 'full-var', block: 'full-var', fans: 'low'   },
+    { label: 'Ideal Case',           desc: '', fixed: true,  shade: 'ideal',    block: 'ideal',    fans: 'high'  }
   ];
   var _otcActiveFilterCase = 0;
   var _otcCaseUTCI = [];          // per-case 8760-element UTCI arrays
@@ -1523,20 +1528,20 @@
 
   // === STRATEGY OPTION DEFINITIONS ===
   var _otcShadeOptions = [
-    { value: 'none',          label: 'No Shading',                   short: 'No Shade'          },
-    { value: 'partial-fixed', label: 'Partial Shading (fixed)',       short: 'Partial Shade (F)' },
-    { value: 'partial-var',   label: 'Partial Shading (variable)',    short: 'Partial Shade (V)' },
-    { value: 'full-fixed',    label: 'Full Shading (fixed)',          short: 'Full Shade (F)'    },
-    { value: 'full-var',      label: 'Full Shading (variable)',       short: 'Full Shade (V)'    },
+    { value: 'none',          label: 'No Shading',                    short: 'No Shade'          },
+    { value: 'partial-fixed', label: 'Partial Shading (fixed)',       short: 'Partial Shade (Fix)' },
+    { value: 'partial-var',   label: 'Partial Shading (variable)',    short: 'Partial Shade (Var)' },
+    { value: 'full-fixed',    label: 'Full Shading (fixed)',          short: 'Full Shade (Fix)'    },
+    { value: 'full-var',      label: 'Full Shading (variable)',       short: 'Full Shade (Var)'    },
     { value: 'ideal',         label: 'Ideal Shading',                 short: 'Ideal Shade'       }
   ];
   var _otcBlockOptions = [
-    { value: 'none',          label: 'No Wind Block',                 short: 'No Block'          },
-    { value: 'partial-fixed', label: 'Partial Wind Block (fixed)',    short: 'Part. Block (F)'   },
-    { value: 'partial-var',   label: 'Partial Wind Block (variable)', short: 'Part. Block (V)'   },
-    { value: 'full-fixed',    label: 'Full Wind Block (fixed)',       short: 'Full Block (F)'    },
-    { value: 'full-var',      label: 'Full Wind Block (variable)',    short: 'Full Block (V)'    },
-    { value: 'ideal',         label: 'Ideal Wind Block',              short: 'Ideal Block'       }
+    { value: 'none',          label: 'No Wind Block',                 short: 'No Wind Block'          },
+    { value: 'partial-fixed', label: 'Partial Wind Block (fixed)',    short: 'Partial Wind Block (Fix)'   },
+    { value: 'partial-var',   label: 'Partial Wind Block (variable)', short: 'Partial Wind Block (Var)'   },
+    { value: 'full-fixed',    label: 'Full Wind Block (fixed)',       short: 'Full Wind Block (Fix)'    },
+    { value: 'full-var',      label: 'Full Wind Block (variable)',    short: 'Full Wind Block (Var)'    },
+    { value: 'ideal',         label: 'Ideal Wind Block',              short: 'Ideal Wind Block'       }
   ];
   var _otcFanOptions = [
     { value: 'none',  label: 'No Added Wind',                      short: 'No Fans'   },
@@ -1546,16 +1551,17 @@
 
   // === UTCI STRESS CATEGORY COLORS (standard UTCI RCB scheme) ===
   var _otcUTCIColors = [
-    '#313695',  // 0: Extreme Cold (<-40\u00b0C)
-    '#4575b4',  // 1: Very Strong Cold (-40 to -27)
-    '#74add1',  // 2: Strong Cold (-27 to -13)
-    '#abd9e9',  // 3: Moderate Cold (-13 to 0)
-    '#e0f3f8',  // 4: Slight Cold (0 to 9)
-    '#66bb6a',  // 5: No Thermal Stress (9 to 26)
-    '#fee090',  // 6: Moderate Heat (26 to 32)
-    '#fdae61',  // 7: Strong Heat (32 to 38)
-    '#f46d43',  // 8: Very Strong Heat (38 to 46)
-    '#a50026'   // 9: Extreme Heat (>46\u00b0C)
+    '#7b2abf',  // 0: Extreme Cold (<-40°C)
+    '#2e4dc2',  // 1: Very Strong Cold (-40 to -27)
+    '#0088cc',  // 2: Strong Cold (-27 to -13)
+    '#00b8d0',  // 3: Moderate Cold (-13 to 0)
+    '#4dcfb0',  // 4: Slight Cold (0 to 9)
+    '#00c880',  // 5: No Thermal Stress cool (9 to 18)
+    '#00aa44',  // 6: Thermal Comfort Zone (18 to 26)
+    '#88cc00',  // 7: Moderate Heat (26 to 32)
+    '#eedd00',  // 8: Strong Heat (32 to 38)
+    '#f07800',  // 9: Very Strong Heat (38 to 46)
+    '#cc1122'   // 10: Extreme Heat (>46°C)
   ];
   var _otcUTCICatNames = [
     'Extreme Cold (<\u221240\u00b0C)',
@@ -1563,7 +1569,8 @@
     'Strong Cold (\u221227 to \u221213)',
     'Moderate Cold (\u221213 to 0)',
     'Slight Cold (0 to 9)',
-    'No Thermal Stress (9\u201326)',
+    'No Thermal Stress (9\u201318)',
+    'Thermal Comfort Zone (18\u201326)',
     'Moderate Heat (26\u201332)',
     'Strong Heat (32\u201338)',
     'Very Strong Heat (38\u201346)',
@@ -1584,11 +1591,12 @@
     if (u < -13) return 2;
     if (u <   0) return 3;
     if (u <   9) return 4;
-    if (u <  26) return 5;
-    if (u <  32) return 6;
-    if (u <  38) return 7;
-    if (u <  46) return 8;
-    return 9;
+    if (u <  18) return 5;
+    if (u <  26) return 6;
+    if (u <  32) return 7;
+    if (u <  38) return 8;
+    if (u <  46) return 9;
+    return 10;
   }
 
   /**
@@ -1682,7 +1690,7 @@
 
   /** Count UTCI category hours for one case using the provided filtered index array. */
   function _otcBuildCounts(utciArr, filteredIndices) {
-    var counts = [0,0,0,0,0,0,0,0,0,0];
+    var counts = [0,0,0,0,0,0,0,0,0,0,0];
     for (var j = 0; j < filteredIndices.length; j++) {
       var ci = _otcCatIndex(utciArr[filteredIndices[j]]);
       if (ci >= 0) counts[ci]++;
@@ -1708,7 +1716,7 @@
 
     // Build counts for all 5 cases
     var caseCounts = _otcCases.map(function(c, ci) {
-      return _otcCaseUTCI[ci] ? _otcBuildCounts(_otcCaseUTCI[ci], filteredIndices) : [0,0,0,0,0,0,0,0,0,0];
+      return _otcCaseUTCI[ci] ? _otcBuildCounts(_otcCaseUTCI[ci], filteredIndices) : [0,0,0,0,0,0,0,0,0,0,0];
     });
 
     // Summary stats
@@ -1737,7 +1745,7 @@
     }
 
     // Chart layout
-    var margin = { top: 34, right: 212, bottom: 120, left: 68 };
+    var margin = { top: 34, right: 212, bottom: 70, left: 68 };
     var svgW = 870, svgH = 410;
     var W = svgW - margin.left - margin.right;
     var H = svgH - margin.top  - margin.bottom;
@@ -1784,13 +1792,15 @@
               };
             })(c.label, _otcUTCICatNames[catIdx], count, barTotal))
             .on('mouseout', function() { tooltip.style('display', 'none'); });
-        if (barTotal > 0 && count / barTotal >= 0.05 && barH >= 13) {
+        var labelPct = barTotal > 0 ? (count / barTotal * 100) : 0;
+        if (labelPct >= 1 && barH >= 13) {
           svg.append('text')
-              .attr('x', bx + bw / 2).attr('y', barY + barH / 2 + 4)
+              .attr('x', bx + bw / 2)
+              .attr('y', barY + barH / 2 + 4)
               .attr('text-anchor', 'middle')
               .style('font-size', '10px')
               .style('fill', (catIdx <= 1 || catIdx >= 9) ? '#fff' : '#333')
-              .text((count / barTotal * 100).toFixed(0) + '%');
+              .text(labelPct.toFixed(0) + '%');
         }
         y0 += count;
       });
@@ -1824,9 +1834,10 @@
     svg.append('text').attr('transform', 'rotate(-90)').attr('x', -H / 2).attr('y', -margin.left + 14)
         .attr('text-anchor', 'middle').style('font-size', '12px').text('Hours');
 
-    // Legend (only categories with data)
+    // Legend (only categories with data, heat on top)
     var legendX = W + 12, li = 0;
-    _otcUTCIColors.forEach(function(color, catIdx) {
+    _otcUTCIColors.slice().reverse().forEach(function(color, revIdx) {
+      var catIdx = _otcUTCIColors.length - 1 - revIdx;
       if (!caseCounts.some(function(counts) { return counts[catIdx] > 0; })) return;
       var ly = li * 21;
       svg.append('rect').attr('x', legendX).attr('y', ly).attr('width', 13).attr('height', 13)
@@ -1912,6 +1923,16 @@
       });
     });
 
+    // Case name inputs — update _otcCases label and re-render chart
+    [1, 2, 3].forEach(function(caseIdx) {
+      var inp = document.getElementById('otcCaseName' + caseIdx);
+      if (!inp) return;
+      inp.addEventListener('change', function() {
+        _otcCases[caseIdx].label = this.value.trim() || ('Case ' + (caseIdx + 1));
+        _otcRenderChart();
+      });
+    });
+
     // Radio buttons — select active UTCI filter case
     document.querySelectorAll('input[name="otcFilterCase"]').forEach(function(radio) {
       radio.addEventListener('change', function() {
@@ -1933,6 +1954,23 @@
   // =====================================================================
   //  END OUTDOOR THERMAL COMFORT STRATEGIES TAB
   // =====================================================================
+
+  function downloadOTCCSV() {
+    if (!window._otcFilteredData || !_otcCaseUTCI.length) { alert('No OTC data to export. Load an EPW file first.'); return; }
+    var filteredIndices = window._otcFilteredData.map(function(d) { return d.index; });
+    var header = ['Category'].concat(_otcCases.map(function(c) { return c.label + (c.desc ? ' - ' + c.desc : ''); }));
+    var rows = [header.join(',')];
+    _otcUTCICatNames.forEach(function(name, catIdx) {
+      var row = [JSON.stringify(name)];
+      _otcCases.forEach(function(c, ci) {
+        var counts = _otcCaseUTCI[ci] ? _otcBuildCounts(_otcCaseUTCI[ci], filteredIndices) : new Array(11).fill(0);
+        row.push(counts[catIdx] || 0);
+      });
+      rows.push(row.join(','));
+    });
+    var blob = new Blob(['\uFEFF' + rows.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+    triggerBlobDownload(blob, 'utci-stress-categories.csv');
+  }
 
   function downloadPNG(containerId, filename) {
     var svgEl = document.querySelector('#' + containerId + ' svg');

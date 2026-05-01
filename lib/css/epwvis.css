@@ -733,8 +733,9 @@ header a:hover              { color: black;     text-decoration: underline; }
   color: #333;
   white-space: nowrap;
 }
-.otc-th-case   { width: 120px; }
-.otc-th-active { width: 80px; text-align: center; }
+.otc-th-case     { width: 156px; }
+.otc-th-strategy { width: 100px; }
+.otc-th-active   { width: 80px; text-align: center; }
 .otc-th-sub {
   display: block;
   font-weight: normal;
@@ -756,6 +757,7 @@ header a:hover              { color: black;     text-decoration: underline; }
 .otc-radio-cell { text-align: center; }
 .otc-radio-cell label { margin: 0; cursor: pointer; }
 .otc-select { font-size: 12px; padding: 2px 4px; height: auto; }
+.otc-case-name-input { font-size: 12px; font-weight: bold; padding: 2px 5px; height: auto; border-color: #dee2e6; }
 .otc-summary-panel { margin: 6px 0 14px 0; }
 .otc-summary-table { border-collapse: separate; border-spacing: 0; }
 .otc-summary-table td { padding: 3px 14px 3px 0; font-size: 13px; }
