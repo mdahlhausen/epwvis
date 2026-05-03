@@ -1959,6 +1959,7 @@
       radio.addEventListener('change', function() {
         if (this.checked) {
           _otcActiveFilterCase = parseInt(this.value, 10);
+          if (typeof window.resetAll === 'function') { window.resetAll(); }
           if (_otcCaseUTCI.length > 0) { _otcApplyFilterCase(_otcActiveFilterCase); }
         }
       });
