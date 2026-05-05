@@ -6,7 +6,7 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.2.0" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.3.0" type="text/css"/>
 
 <!-- Dynamic color overrides (updated by settings panel JS) -->
 <style id="epv-dyn-colors">
@@ -27,6 +27,7 @@
 <script type="text/javascript" src="./lib/js/save-svg-as-png/saveSvgAsPng.js"></script>
 <script type="text/javascript" src="./lib/js/jszip/jszip.min.js"></script>
 <script type="text/javascript" src="./data/stations.js"></script>
+<script type="text/javascript" src="./lib/js/epwCompare.js?v=0.1.0"></script>
 
 </head>
 
@@ -74,6 +75,14 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12">
+
+                    <!-- Mode switcher (top-level pills) -->
+                    <ul class="nav nav-pills" id="modeSwitcher" style="margin:8px 0 12px 0; gap:6px;">
+                        <li class="nav-item"><a class="nav-link active" id="mode-pill-single" href="#">Single File Analysis</a></li>
+                        <li class="nav-item"><a class="nav-link" id="mode-pill-compare" href="#">Climate Change Comparison</a></li>
+                    </ul>
+
+                    <div id="mode-single">
 
                     <!-- second nav bar -->
                     <div class="d-flex flex-wrap align-items-center gap-3 py-2">
@@ -647,6 +656,156 @@
                         </div>
 
                     </div>
+                    </div><!-- /mode-single -->
+
+                    <!-- ========== Climate Change Comparison mode ========== -->
+                    <div id="mode-compare" style="display:none;">
+                      <div class="compare-panel">
+                        <div class="compare-section">
+                          <div class="compare-section-header">Base File</div>
+                          <div id="compare-base-info" class="compare-base-info">
+                            <em style="color:#888;">No base file loaded yet.</em>
+                          </div>
+                          <div class="compare-base-uploaders">
+                            <div>
+                              <label style="display:block; font-size:13px; font-weight:bold; margin-bottom:3px;">Select base EPW:</label>
+                              <input type="file" id="compare-base-input" accept=".epw">
+                            </div>
+                            <div style="text-align:center;"><h5 style="margin:0;">OR</h5></div>
+                            <div>
+                              <div class="upload-drop-zone" id="compare-base-drop" style="width:240px;">
+                                drag and drop base EPW here
+                              </div>
+                            </div>
+                            <div style="font-size:12px; color:#666; max-width:300px;">
+                              The base file from the Single File tab carries over here automatically.
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="compare-section">
+                          <div class="compare-section-header">
+                            Future Files
+                            <button id="compare-add-future-btn" class="btn btn-primary btn-sm" disabled
+                              style="margin-left:12px;">+ Add Future Files</button>
+                            <input type="file" id="compare-futures-input" accept=".epw" multiple style="display:none;">
+                          </div>
+
+                          <div class="compare-help-note">
+                            <b>WeatherShift</b> files are detected and parsed from their filename automatically — no renaming needed.<br>
+                            For other future EPWs, rename so the filename ends with
+                            <code>…_&lt;percentile&gt;%_&lt;scenario&gt;_&lt;year&gt;.epw</code>:
+                            <ul>
+                              <li><code>&lt;percentile&gt;</code> — warming percentile, e.g. <code>10</code>, <code>50</code>, <code>90</code></li>
+                              <li><code>&lt;scenario&gt;</code> — <code>ssp</code> followed by 3 digits (e.g. <code>ssp585</code>, <code>ssp245</code>) or <code>rcp</code> followed by 2 digits (e.g. <code>rcp45</code>, <code>rcp85</code>). RCPs are for CMIP5-era projections; SSPs are CMIP6+.</li>
+                              <li><code>&lt;year&gt;</code> — the projection target year, e.g. <code>2050</code>, <code>2070</code></li>
+                            </ul>
+                            Example: <code>mystation_50%_ssp585_2070.epw</code>. Files that don't match are still loaded — their metadata fields just show "unknown".
+                          </div>
+
+                          <div id="compare-futures-list" class="compare-futures-list"></div>
+                        </div>
+
+                        <div class="compare-section">
+                          <div class="compare-section-header">Comparison Charts</div>
+
+                          <ul class="nav nav-tabs compare-chart-tabs" id="compareChartTabs" role="tablist">
+                            <li class="nav-item"><a class="nav-link active" id="cmp-pill-monthly"     href="#cmp-monthly"    data-bs-toggle="tab" role="tab">Monthly Mean</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-daily"       href="#cmp-daily"      data-bs-toggle="tab" role="tab">Daily Profile</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-heatmap"     href="#cmp-heatmap"    data-bs-toggle="tab" role="tab">Heatmap</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-duration"    href="#cmp-duration"   data-bs-toggle="tab" role="tab">Duration Curve</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-monthbox"    href="#cmp-monthbox"   data-bs-toggle="tab" role="tab">Monthly Boxplots</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-trajectory"  href="#cmp-trajectory" data-bs-toggle="tab" role="tab">Climate Trajectory</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-periodbox"   href="#cmp-periodbox"  data-bs-toggle="tab" role="tab">Period Boxplots</a></li>
+                            <li class="nav-item"><a class="nav-link"        id="cmp-pill-degdays"     href="#cmp-degdays"    data-bs-toggle="tab" role="tab">Degree Days</a></li>
+                          </ul>
+
+                          <div class="tab-content compare-tab-content">
+
+                            <div class="tab-pane fade show active" id="cmp-monthly" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="monthly"></select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-monthly"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-daily" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="daily"></select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-daily"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-heatmap" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="heatmap"></select>
+                                <label style="margin-left:14px;">Mode:</label>
+                                <select id="compare-heatmap-mode" class="form-control form-control-sm">
+                                  <option value="absolute">Absolute</option>
+                                  <option value="delta" selected>Δ from base</option>
+                                </select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-heatmap"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-duration" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="duration"></select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-duration"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-monthbox" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="monthbox"></select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-monthbox"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-trajectory" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="trajectory"></select>
+                                <label style="margin-left:14px;">Statistic:</label>
+                                <select id="compare-traj-stat" class="form-control form-control-sm">
+                                  <option value="mean" selected>Annual mean</option>
+                                  <option value="max">Annual maximum</option>
+                                  <option value="min">Annual minimum</option>
+                                  <option value="p99">99th percentile</option>
+                                  <option value="p01">1st percentile</option>
+                                </select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-trajectory"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-periodbox" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Variable:</label>
+                                <select class="compare-var-select form-control form-control-sm" data-chart="periodbox"></select>
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-periodbox"></div>
+                            </div>
+
+                            <div class="tab-pane fade" id="cmp-degdays" role="tabpanel">
+                              <div class="compare-controls">
+                                <label>Heating base (°C):</label>
+                                <input id="compare-dd-hbase" type="number" class="form-control form-control-sm" value="18" step="0.5" style="width:80px;">
+                                <label style="margin-left:14px;">Cooling base (°C):</label>
+                                <input id="compare-dd-cbase" type="number" class="form-control form-control-sm" value="18" step="0.5" style="width:80px;">
+                              </div>
+                              <div class="compare-chart-container" id="compare-chart-degdays"></div>
+                            </div>
+
+                          </div><!-- /compare-tab-content -->
+                        </div>
+                      </div>
+                    </div><!-- /mode-compare -->
+
                 </div>
             </div>
         </div>
@@ -970,6 +1129,7 @@
       .then(function(epwText) {
         clearEPWCharts();
         epw = epw2json(epwText);
+        if (window.epwCompare) window.epwCompare.setBase(epw, station.n + '.epw', epwText);
         document.getElementById('stationName').innerHTML =
           'Weather for ' + epw.stationLocation +
           ' <small style="font-size:12px;color:#888;">(TMYx 2009-2023, via <a href="' +
@@ -1056,6 +1216,7 @@
 
         // parse file to an epw json object
         epw = epw2json(raw);
+        if (window.epwCompare) window.epwCompare.setBase(epw, f.name, raw);
 
 		//console.log(epw);
 		document.getElementById('stationName').innerHTML = "Weather for " + epw.stationLocation;
@@ -1110,6 +1271,7 @@
         var epwText = new TextDecoder('utf-8').decode(uint8array);
         clearEPWCharts();
         epw = epw2json(epwText);
+        if (window.epwCompare) window.epwCompare.setBase(epw, label || 'remote.epw', epwText);
         document.getElementById('stationName').innerHTML =
           'Weather for ' + epw.stationLocation +
           ' <small style="font-size:12px;color:#888;">(<a href="' +

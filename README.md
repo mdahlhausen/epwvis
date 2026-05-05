@@ -6,6 +6,8 @@ EPW files can be downloaded from [epwmap](https://www.ladybug.tools/epwmap/), [O
 
 When an EPW file is parsed, epwvis now computes additional psychrometric properties (wet-bulb temperature, humidity ratio, specific humidity, vapor pressure, moist-air enthalpy/volume/density, and degree of saturation) using [PsychroLib](github.com/psychrometrics/psychrolib).
 
+A **Climate Change Comparison** mode lets you load a historic base EPW alongside multiple future EPWs (e.g. from [WeatherShift](http://www.weathershift.com)) and compare them across eight chart types — monthly means, daily profiles, heatmaps with Δ-from-base, duration curves, monthly and period boxplots, climate-trajectory plots, and degree days. Scenario (RCP/SSP), projection year, and warming percentile are auto-parsed from WeatherShift filenames.
+
 ## How to Interpret the Visualizations
 See the [**Wiki**](https://github.com/mdahlhausen/epwvis/wiki) tab for more details on how to interpret weather data for environmental design and building energy modeling.
 
