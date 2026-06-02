@@ -111,7 +111,10 @@
                               <select id="power-year" class="form-control form-control-sm" style="width:90px;"></select>
                               <button id="power-submit" class="btn btn-primary btn-sm">Load</button>
                             </div>
-                            <div id="power-status">Any location on earth</div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                              <div id="power-status">Any location on earth</div>
+                              <a id="power-download" style="display:none; font-size:12px; text-decoration:underline; cursor:pointer;">download .epw file</a>
+                            </div>
                             <div id="power-progress-bar"><div id="power-progress-fill"></div></div>
                           </div>
                         </div>  <!-- left nav items -->
@@ -1107,6 +1110,8 @@
     var url = 'https://power.larc.nasa.gov/api/temporal/hourly/point?start=' + year + '0101&end=' + year + '1231'
       + '&latitude=' + lat + '&longitude=' + lon
       + '&community=SB&units=metric&parameters=T2M&format=EPW&time-standard=LST&user=EPWVIS';
+    console.log('NASA POWER API request:', url);
+    document.getElementById('power-download').style.display = 'none';
     setPowerStatus('Requesting NASA POWER data…', 'loading');
     setPowerProgress(-1);
     fetch(url)
@@ -1127,6 +1132,11 @@
         document.getElementById('downloadAllBtns').style.display = '';
         updateCharts(epw, unitSystem);
         setPowerStatus('Loaded: ' + lat + ', ' + lon + ' (' + year + ')', 'ok');
+        var dlLink = document.getElementById('power-download');
+        var blob = new Blob([epwText], { type: 'text/plain' });
+        dlLink.href = URL.createObjectURL(blob);
+        dlLink.download = lat + '_' + lon + '_' + year + '.epw';
+        dlLink.style.display = 'inline';
       })
       .catch(function(err) {
         setPowerStatus('Request failed: ' + err.message, 'error');
