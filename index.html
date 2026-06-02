@@ -6,7 +6,7 @@
 <title>epwvis</title>
 <!-- load css -->
 <link rel="stylesheet" href="./lib/css/bootstrap/bootstrap.min.css" type="text/css"/>
-<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.2.0" type="text/css"/>
+<link rel="stylesheet" href="./lib/css/epwvis.css?v=1.3.0" type="text/css"/>
 
 <!-- Dynamic color overrides (updated by settings panel JS) -->
 <style id="epv-dyn-colors">
@@ -101,6 +101,21 @@
                               <div id="epw-search-status">Loading station list…</div>
                               <div id="epw-progress-bar"><div id="epw-progress-fill"></div></div>
                             </div>
+                          </div>
+                          <div style="text-align:center;"><h3>OR</h3></div>
+                          <div id="power-container" style="padding-top:6px;">
+                            <div style="font-size:11px; color:#888; margin-bottom:3px;">AMY data from <a href="https://power.larc.nasa.gov/" target="_blank">NASA POWER</a></div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                              <input type="number" id="power-lat" class="form-control form-control-sm" style="width:110px;" placeholder="Lat (-90 to 90)" min="-90" max="90" step="any">
+                              <input type="number" id="power-lon" class="form-control form-control-sm" style="width:120px;" placeholder="Lon (-180 to 180)" min="-180" max="180" step="any">
+                              <select id="power-year" class="form-control form-control-sm" style="width:90px;"></select>
+                              <button id="power-submit" class="btn btn-primary btn-sm">Load</button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                              <div id="power-status">Any location on Earth</div>
+                              <a id="power-download" style="display:none; font-size:12px; text-decoration:underline; cursor:pointer;">Download .epw file</a>
+                            </div>
+                            <div id="power-progress-bar"><div id="power-progress-fill"></div></div>
                           </div>
                         </div>  <!-- left nav items -->
 
@@ -1040,6 +1055,93 @@
       setTimeout(hideDropdown, 150);
     });
   });
+
+  // ---- NASA POWER: populate year dropdown and fetch logic ----
+  (function() {
+    var yearSelect = document.getElementById('power-year');
+    var currentYear = new Date().getFullYear();
+    for (var y = currentYear - 1; y >= 2001; y--) {
+      var opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = String(y);
+      yearSelect.appendChild(opt);
+    }
+
+    document.getElementById('power-submit').addEventListener('click', function() {
+      var lat = parseFloat(document.getElementById('power-lat').value);
+      var lon = parseFloat(document.getElementById('power-lon').value);
+      var year = document.getElementById('power-year').value;
+      if (isNaN(lat) || lat < -90 || lat > 90) { alert('Latitude must be between -90 and 90.'); return; }
+      if (isNaN(lon) || lon < -180 || lon > 180) { alert('Longitude must be between -180 and 180.'); return; }
+      fetchFromPower(lat, lon, year);
+    });
+  })();
+
+  function setPowerStatus(msg, cls) {
+    var el = document.getElementById('power-status');
+    el.textContent = msg;
+    el.className = cls || '';
+    if (cls !== 'loading') hidePowerProgress();
+  }
+
+  function setPowerProgress(pct) {
+    var bar  = document.getElementById('power-progress-bar');
+    var fill = document.getElementById('power-progress-fill');
+    bar.style.display = 'block';
+    if (pct < 0) {
+      bar.classList.add('indeterminate');
+      fill.style.width = '';
+    } else {
+      bar.classList.remove('indeterminate');
+      fill.style.width = Math.min(100, pct) + '%';
+    }
+  }
+
+  function hidePowerProgress() {
+    var bar = document.getElementById('power-progress-bar');
+    if (bar) {
+      bar.style.display = 'none';
+      bar.classList.remove('indeterminate');
+      document.getElementById('power-progress-fill').style.width = '0%';
+    }
+  }
+
+  function fetchFromPower(lat, lon, year) {
+    var url = 'https://power.larc.nasa.gov/api/temporal/hourly/point?start=' + year + '0101&end=' + year + '1231'
+      + '&latitude=' + lat + '&longitude=' + lon
+      + '&community=SB&units=metric&parameters=T2M&format=EPW&time-standard=LST&user=EPWVIS';
+    console.log('NASA POWER API request:', url);
+    document.getElementById('power-download').style.display = 'none';
+    setPowerStatus('Requesting NASA POWER data…', 'loading');
+    setPowerProgress(-1);
+    fetch(url)
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        setPowerStatus('Downloading…', 'loading');
+        return res.arrayBuffer();
+      })
+      .then(function(buf) {
+        setPowerProgress(100);
+        var epwText = new TextDecoder('utf-8').decode(new Uint8Array(buf));
+        clearEPWCharts();
+        epw = epw2json(epwText);
+        document.getElementById('stationName').innerHTML =
+          'Weather for ' + epw.stationLocation +
+          ' <small style="font-size:12px;color:#888;">(' + year + ', via <a href="https://power.larc.nasa.gov/" target="_blank">NASA POWER</a>)</small>';
+        setKoppenClassification(epw);
+        document.getElementById('downloadAllBtns').style.display = '';
+        updateCharts(epw, unitSystem);
+        setPowerStatus('Loaded: ' + lat + ', ' + lon + ' (' + year + ')', 'ok');
+        var dlLink = document.getElementById('power-download');
+        var epwBlob = new Blob([epwText], { type: 'text/plain' });
+        var epwFilename = lat + '_' + lon + '_' + year + '.epw';
+        dlLink.onclick = function() { triggerBlobDownload(epwBlob, epwFilename); };
+        dlLink.style.display = 'inline';
+      })
+      .catch(function(err) {
+        setPowerStatus('Request failed: ' + err.message, 'error');
+      });
+  }
 
   function readSingleFile(file) {
     var f = file;
