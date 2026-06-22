@@ -815,3 +815,194 @@ header a:hover              { color: black;     text-decoration: underline; }
 .otc-methodology ul, .otc-methodology ol { margin: 6px 0; padding-left: 22px; }
 .otc-methodology li { margin-bottom: 4px; }
 .otc-no-data { color: #888; padding: 20px 0; font-style: italic; font-size: 14px; }
+/* ---------- Climate Change Comparison mode ---------- */
+#modeSwitcher .nav-link {
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 14px;
+  color: #555;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+}
+#modeSwitcher .nav-link.active {
+  background: #1a6faf;
+  color: #fff;
+  border-color: #1a6faf;
+}
+#modeSwitcher .nav-link:hover:not(.active) {
+  background: #e3e8ee;
+  color: #333;
+  cursor: pointer;
+}
+
+.compare-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 8px 0;
+}
+.compare-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 14px 16px;
+  background: #fafafa;
+}
+.compare-section-header {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+.compare-base-info {
+  padding: 8px 10px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.compare-base-uploaders {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.compare-futures-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.compare-future-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 4px;
+  font-size: 13px;
+}
+.compare-swatch {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+  border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+.compare-meta {
+  font-weight: 600;
+  color: #333;
+  min-width: 280px;
+}
+.compare-fname {
+  color: #888;
+  font-size: 11px;
+  font-family: monospace;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.compare-remove {
+  border: none;
+  background: transparent;
+  color: #c0392b;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 6px;
+  line-height: 1;
+}
+.compare-remove:hover {
+  color: #fff;
+  background: #c0392b;
+  border-radius: 3px;
+}
+#compare-add-future-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+#compare-chart svg .axis path,
+#compare-chart svg .axis line {
+  fill: none;
+  stroke: #999;
+  shape-rendering: crispEdges;
+}
+#compare-chart svg .axis text {
+  font-size: 11px;
+  fill: #555;
+}
+
+/* Comparison chart tabs + controls */
+.compare-chart-tabs {
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.compare-chart-tabs .nav-link {
+  font-size: 13px;
+  padding: 6px 12px;
+}
+.compare-tab-content {
+  padding: 8px 0;
+}
+.compare-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+.compare-controls label {
+  margin: 0;
+  font-weight: 600;
+  color: #444;
+}
+.compare-controls .form-control {
+  width: auto;
+  min-width: 200px;
+}
+.compare-chart-container {
+  width: 100%;
+  min-height: 340px;
+}
+.compare-chart-container svg .axis path,
+.compare-chart-container svg .axis line {
+  fill: none;
+  stroke: #999;
+  shape-rendering: crispEdges;
+}
+.compare-chart-container svg .axis text {
+  font-size: 11px;
+  fill: #555;
+}
+
+/* Filename-format help note in the Future Files section */
+.compare-help-note {
+  background: #eef4fb;
+  border-left: 3px solid #1a6faf;
+  border-radius: 3px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+  color: #2e3a48;
+  line-height: 1.5;
+}
+.compare-help-note ul {
+  margin: 6px 0 6px 0;
+  padding-left: 22px;
+}
+.compare-help-note li {
+  margin-bottom: 3px;
+}
+.compare-help-note code {
+  background: #fff;
+  border: 1px solid #d6e0eb;
+  border-radius: 2px;
+  padding: 1px 5px;
+  font-size: 12px;
+  color: #1a6faf;
+}

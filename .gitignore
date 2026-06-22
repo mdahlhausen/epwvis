@@ -4,3 +4,8 @@ bin-debug/
 bin-release/
 references/
 weather_files/
+
+# Local dev tooling
+.claude/
+_test_epws/
+.DS_Store
